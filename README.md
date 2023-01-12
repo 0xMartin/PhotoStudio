@@ -1,1 +1,1 @@
-# PhotoStudio
+![PhotoStudio](https://socialify.git.ci/0xMartin/PhotoStudio/image?description=1&descriptionEditable=Aplikace%20pro%20focen%C3%AD%20a%20jednoduchou%20%C3%BApravu%20fotografi%C3%AD&language=1&name=1&owner=1&theme=Light)

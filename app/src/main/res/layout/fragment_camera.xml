@@ -7,13 +7,12 @@
     tools:context=".CameraFragment"
     android:background="@color/black_1">
 
-    <FrameLayout
-        android:id="@+id/camera_preview"
+    <TextureView
+        android:id="@+id/textureView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1"
-        tools:ignore="MissingConstraints" >
-    </FrameLayout>
+        tools:ignore="MissingConstraints"
+        />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="fill_parent"

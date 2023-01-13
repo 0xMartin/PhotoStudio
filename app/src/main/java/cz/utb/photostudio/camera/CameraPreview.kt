@@ -43,20 +43,18 @@ class CameraPreview(
         previewCamera(holder);
     }
 
-    fun previewCamera(holder: SurfaceHolder) {
+    private fun previewCamera(holder: SurfaceHolder) {
         mCamera.apply {
             try {
                 setPreviewDisplay(holder)
                 startPreview()
-                //setPreviewCallback(previewCallback);
-                //autoFocus(autoFocusCallback);
             } catch (e: IOException) {
                 Log.d(TAG, "Error - setting camera preview: ${e.message}")
             }
         }
     }
 
-    fun setCameraDisplayOrientation(camera: Camera) {
+    private fun setCameraDisplayOrientation(camera: Camera) {
         val parameters = camera.parameters
         val camInfo = CameraInfo()
         Camera.getCameraInfo(getBackFacingCameraId(), camInfo)

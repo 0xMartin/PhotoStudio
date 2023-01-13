@@ -12,18 +12,53 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints" >
+    </FrameLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button_capture"
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="16dp"
+        android:background="@color/black_1"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="7dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/take_photo_icon"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints">
+
+        <ImageButton
+            android:id="@+id/button_gallery"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/gallery_icon"
+            android:background="@null" />
+
+        <Space
+            android:layout_width="25dp"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button_capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="0dp"
+            app:srcCompat="@drawable/take_photo_icon"
+            android:tint="@color/white"
+            tools:ignore="MissingConstraints" />
+
+        <Space
+            android:layout_width="25dp"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/button_edit"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/edit_icon"
+            android:background="@null" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

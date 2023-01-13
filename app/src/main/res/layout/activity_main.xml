@@ -12,15 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.PhotoStudio.AppBarOverlay">
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:navigationIcon="@drawable/main_icon_small"
-            app:popupTheme="@style/Theme.PhotoStudio.PopupOverlay" />
-
+            android:logo="@drawable/main_icon_rect"
+            app:logo="@drawable/main_icon_rect"
+            app:popupTheme="@style/Theme.PhotoStudio.PopupOverlay">
+        </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main" />

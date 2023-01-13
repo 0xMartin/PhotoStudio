@@ -2,8 +2,8 @@ package cz.utb.photostudio.camera
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.hardware.Camera
+import android.util.Log
 
 class CameraService {
     companion object {
@@ -22,16 +22,29 @@ class CameraService {
          */
         fun getCameraInstance(): Camera? {
             return try {
-                Camera.open() // attempt to get a Camera instance
+                var cam = Camera.open()
+                cam.autoFocus(this.defaultFocusCallback);
+                return cam
             } catch (e: Exception) {
-                // Camera is not available (in use or does not exist)
-                null // returns null if camera is unavailable
+                null
             }
         }
 
-        val defaultPictureCallback = Camera.PictureCallback { data, _ ->
-
+        /**
+         * Defaultni callback pro zpracovani porizeneho snimku
+         */
+        val defaultPictureCallback = Camera.PictureCallback { data, camera ->
+            {
+                Log.d(TAG, "Picture taken!}")
+            }
         }
+
+        /**
+         * Defaultni callback pro zpracovani zaostrani
+         */
+        val defaultFocusCallback = Camera.AutoFocusCallback { success, camera ->
+
+        };
 
     }
 }

@@ -2,6 +2,7 @@ package cz.utb.photostudio
 
 import android.hardware.Camera
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -32,15 +33,24 @@ class CameraFragment : Fragment() {
     ): View? {
         this._binding = FragmentCameraBinding.inflate(inflater, container, false)
 
-        // Create an instance of Camera
-        this.camera = CameraService.getCameraInstance()
-
-        this.cameraPreview = this.camera?.let {
-            // Create our Preview view
-            this.context?.let { cntx -> CameraPreview(cntx, it) }
+        // overi zda ma zarizeni kameru
+        this.context?.let { it1 ->
+            {
+                if(!CameraService.checkCameraHardware(it1)) {
+                    Log.d("CAMERA_FRAGMENT", "Error camera not found")
+                }
+            }
         }
 
-        // Set the Preview view as the content of our activity.
+        // ziska instanci kamery
+        this.camera = CameraService.getCameraInstance()
+
+        // vytvori preview pro obraz zaznamenavany z kamery
+        this.cameraPreview = this.camera?.let {
+            this.context?.let { it1 -> CameraPreview(it1, it) }
+        }
+
+        // preview nastavi jako obsah frame layoutu
         this.cameraPreview?.also {
             val preview: FrameLayout = this.binding.cameraPreview
             preview.addView(it)
@@ -52,8 +62,8 @@ class CameraFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // udela snimek
         this.binding.buttonCapture.setOnClickListener {
-            // get an image from the camera
             this.camera?.takePicture(null, null, CameraService.defaultPictureCallback)
         }
     }

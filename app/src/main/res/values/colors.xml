@@ -4,11 +4,12 @@
     <color name="purple_200">#661188</color>
     <color name="purple_500">#551177</color>
     <color name="purple_700">#441166</color>
-    <color name="teal_200">#881166</color>
+    <color name="teal_200">#66881166</color>
     <color name="teal_700">#661144</color>
     <color name="black">#FF000000</color>
     <color name="black_1">#FF111111</color>
     <color name="white">#FFFFFFFF</color>
     <color name="main_color">#FF00AA</color>
+    <color name="main_color_transparent">#44FF00AA</color>
 
 </resources>

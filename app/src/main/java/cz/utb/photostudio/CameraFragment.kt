@@ -1,13 +1,10 @@
 package cz.utb.photostudio
 
-import android.hardware.Camera
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import cz.utb.photostudio.camera.CameraService
 import cz.utb.photostudio.databinding.FragmentCameraBinding
 
@@ -31,9 +28,9 @@ class CameraFragment : Fragment() {
         this._binding = FragmentCameraBinding.inflate(inflater, container, false)
 
         // inicializuje kamera servis
-        this.cameraService.initService(this.binding.textureView)
-
-
+        this.context?.let {
+            this.cameraService.initService(it, this.binding.textureView)
+        }
 
         return this.binding.root
     }
@@ -54,7 +51,7 @@ class CameraFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        this.context?.let { this.cameraService.startService(it) }
+        this.cameraService.startService()
     }
 
     override fun onPause() {

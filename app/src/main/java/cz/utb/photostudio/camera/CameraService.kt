@@ -26,9 +26,13 @@ class CameraService {
 
     private var cameraId: String? = null
     private var cameraDevice: CameraDevice? = null
+
     private var cameraCaptureSessions: CameraCaptureSession? = null
     private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var imageDimension: Size? = null
+
+    private var mBackgroundThread: HandlerThread? = null
+    private var mBackgroundHandler: Handler? = null
 
     /**********************************************************************************************/
     // PUBLIC SECTION START
@@ -78,7 +82,7 @@ class CameraService {
     private fun createCameraPreview() {
         try {
             val texture = textureView!!.surfaceTexture!!
-            texture.setDefaultBufferSize(imageDimension.getWidth(), imageDimension.getHeight())
+            texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
             val surface = Surface(texture)
             captureRequestBuilder =
                 cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
@@ -113,27 +117,24 @@ class CameraService {
         }
     }
 
-    private fun openCamera() {
-        val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
+    private fun openCamera(): Boolean {
+        if(cameraId == null) {
+            return false
+        }
+
+        val manager = context!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
         try {
             cameraId = manager!!.cameraIdList[0]
-            val characteristics = manager.getCameraCharacteristics(cameraId)
+            val characteristics = manager.getCameraCharacteristics(cameraId!!)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
-            //Check realtime permission if run higher API 23
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(this, arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ), REQUEST_CAMERA_PERMISSION)
-                return
-            }
-            manager.openCamera(cameraId, stateCallback, null)
+            manager.openCamera(cameraId!!, stateCallback, null)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
+            return false
         }
+
+        return true
     }
 
     var textureListener: SurfaceTextureListener = object : SurfaceTextureListener {

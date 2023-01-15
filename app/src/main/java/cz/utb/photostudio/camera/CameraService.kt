@@ -6,6 +6,7 @@ import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.hardware.camera2.CameraCaptureSession.CaptureCallback
+import android.media.Image
 import android.media.ImageReader
 import android.os.Environment
 import android.os.Handler
@@ -108,35 +109,42 @@ class CameraService {
         Log.i(TAG, "Service is stopped.");
     }
 
-    fun takePicture() {
-        if (cameraDevice == null) {
-            Log.e(TAG, "CameraDevice is null.");
+    @Throws(Exception::class)
+    fun takePicture(onImageCaptured: (image: Image) -> Unit) {
+        if(this.cameraDevice == null) {
+            Log.e(TAG, "CameraDevice is null")
             return
         }
-        if (imageDimension == null) {
-            Log.e(TAG, "Image dimension is null");
+        if(this.imageDimension == null) {
+            Log.e(TAG, "Image demension is null")
             return
         }
 
+        // zastavi servis pro snimani obrazu
+        this.stopService()
+
+        // snimek obrazu
         val imageReader: ImageReader = ImageReader.newInstance(imageDimension!!.width, imageDimension!!.height, ImageFormat.JPEG, 2)
         imageReader.setOnImageAvailableListener({ reader ->
             val image = reader.acquireLatestImage()
-            // ##################################################
-            Log.i(TAG, "Picture taken");
+            onImageCaptured(image)
+            image.close()
+            // znovu spusti servis pro snimani obrazu
+            startService()
         }, null)
 
-        val surfaces = listOf(imageReader.surface)
-        this.cameraDevice!!.createCaptureSession(surfaces, object : CameraCaptureSession.StateCallback() {
+        val surface = imageReader.surface
+        val captureRequest = this.cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+        captureRequest.addTarget(surface)
+        applyEffect(captureRequest)
+        this.cameraDevice!!.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
             override fun onConfigured(session: CameraCaptureSession) {
-                val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
-                    this?.addTarget(imageReader.surface)
-                }
-                if (captureRequest != null) {
-                    session.capture(captureRequest.build(), null, null)
-                }
+                session.capture(captureRequest.build(), null, null)
             }
-
-            override fun onConfigureFailed(p0: CameraCaptureSession) {}
+            override fun onConfigureFailed(p0: CameraCaptureSession) {
+                // znovu spusti servis pro snimani obrazu
+                startService()
+            }
         }, null)
     }
 

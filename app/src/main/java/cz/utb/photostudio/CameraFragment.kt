@@ -4,6 +4,7 @@ package cz.utb.photostudio
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,7 +64,15 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
         // udela snimek
         this.binding.buttonCapture.setOnClickListener {
-            this.cameraService.takePicture();
+            try {
+                this.cameraService.takePicture { image ->
+                    Log.i("CAMEAR", "Picture taken")
+                    Log.i("INFO", image.width.toString() + ", " + image.height.toString())
+                    Toast.makeText(requireContext(), "Picture taken", Toast.LENGTH_SHORT).show()
+                }
+            }catch (ex: java.lang.Exception) {
+                Toast.makeText(requireContext(), "Picture take error", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // vyber efektu

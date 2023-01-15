@@ -33,9 +33,9 @@ import org.tensorflow.lite.task.vision.detector.ObjectDetector
 
 class TensorFlowObjDetector(
     var threshold: Float = 0.5f,
-    var numThreads: Int = 2,
-    var maxResults: Int = 4,
-    var currentDelegate: Int = 0,
+    var numThreads: Int = 4,
+    var maxResults: Int = 5,
+    var currentDelegate: Int = DELEGATE_CPU,
     val context: Context,
     val objectDetectorListener: DetectorListener?,
 ) {

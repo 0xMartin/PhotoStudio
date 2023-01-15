@@ -1,6 +1,8 @@
 package cz.utb.photostudio
 
 
+import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
@@ -8,15 +10,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
 import cz.utb.photostudio.camera.CameraService
 import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.objectdetection.TensorFlowObjDetector
 import org.tensorflow.lite.task.vision.detector.Detection
-import java.util.LinkedList
+import java.util.*
+
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -61,6 +66,17 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // animace hlavniho tlacitka
+        val colorFrom = ContextCompat.getColor(this.context!!, R.color.main_color_transparent)
+        val colorTo = ContextCompat.getColor(this.context!!, R.color.main_color)
+        val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo, colorFrom)
+        colorAnimation.duration = 2500 // milliseconds
+        colorAnimation.repeatCount = ValueAnimator.INFINITE
+        colorAnimation.addUpdateListener {
+                animator -> binding.buttonCapture.backgroundTintList = ColorStateList.valueOf(animator.animatedValue as Int)
+        }
+        colorAnimation.start()
 
         // udela snimek
         this.binding.buttonCapture.setOnClickListener {

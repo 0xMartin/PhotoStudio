@@ -10,7 +10,7 @@
     <color name="black_1">#FF111111</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#FFAAAAAA</color>
-    <color name="main_color">#FF00AA</color>
+    <color name="main_color">#FFFF00AA</color>
     <color name="main_color_transparent">#44FF00AA</color>
 
 </resources>

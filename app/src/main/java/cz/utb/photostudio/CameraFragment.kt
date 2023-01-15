@@ -53,7 +53,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         this.objDetector?.initObjectDetector(this.binding.textureView)
 
         // spusti detektor objektu
-        this.objDetector?.runDetector(this.activity!!, 5)
+        this.objDetector?.runDetector(5)
 
         return this.binding.root
     }

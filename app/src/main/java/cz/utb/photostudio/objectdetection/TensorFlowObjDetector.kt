@@ -21,6 +21,7 @@ import android.graphics.Bitmap
 import android.os.SystemClock
 import android.util.Log
 import android.view.TextureView
+import cz.utb.photostudio.config.GlobalConfig
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -96,17 +97,20 @@ class TensorFlowObjDetector(
         }
     }
 
-    fun runDetector(activity: Activity, ups: Int) {
+    fun runDetector(ups: Int) {
         running = true
         Thread(Runnable {
             while (running) {
                 Thread.sleep((1000.0f / ups).toLong())
-                try {
-                    // Pass Bitmap and rotation to the object detector helper for processing and detection
-                    this.textureView?.bitmap?.let {
-                        detect(it, 0)
+                if(GlobalConfig.OBJ_DETECTION_ENABLED) {
+                    try {
+                        // Pass Bitmap and rotation to the object detector helper for processing and detection
+                        this.textureView?.bitmap?.let {
+                            detect(it, 0)
+                        }
+                    } catch (_: Exception) {
                     }
-                } catch (_: Exception) { }
+                }
             }
         }).start()
     }

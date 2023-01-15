@@ -109,8 +109,16 @@ class CameraService {
     }
 
     fun takePicture() {
-        if (cameraDevice == null) return
-        var imageReader: ImageReader = ImageReader.newInstance(1920, 1080, ImageFormat.JPEG, 2)
+        if (cameraDevice == null) {
+            Log.e(TAG, "CameraDevice is null.");
+            return
+        }
+        if (imageDimension == null) {
+            Log.e(TAG, "Image dimension is null");
+            return
+        }
+
+        val imageReader: ImageReader = ImageReader.newInstance(imageDimension!!.width, imageDimension!!.height, ImageFormat.JPEG, 2)
         imageReader.setOnImageAvailableListener({ reader ->
             val image = reader.acquireLatestImage()
             // ##################################################

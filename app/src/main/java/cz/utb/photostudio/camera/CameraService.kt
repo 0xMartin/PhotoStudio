@@ -1,8 +1,13 @@
 package cz.utb.photostudio.camera
 
+import android.app.Activity
 import android.content.Context
+import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.hardware.camera2.CameraCaptureSession.CaptureCallback
+import android.media.ImageReader
+import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -13,6 +18,7 @@ import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.annotation.NonNull
 
 
 class CameraService {
@@ -60,10 +66,6 @@ class CameraService {
         Log.i(TAG, "Service inited.");
     }
 
-    fun takePicture() {
-
-    }
-
     fun selectEffect(effect: Int) {
         if(effect == CaptureRequest.CONTROL_EFFECT_MODE_AQUA ||
             effect == CaptureRequest.CONTROL_EFFECT_MODE_BLACKBOARD ||
@@ -104,6 +106,30 @@ class CameraService {
             e.printStackTrace()
         }
         Log.i(TAG, "Service is stopped.");
+    }
+
+    fun takePicture() {
+        if (cameraDevice == null) return
+        var imageReader: ImageReader = ImageReader.newInstance(1920, 1080, ImageFormat.JPEG, 2)
+        imageReader.setOnImageAvailableListener({ reader ->
+            val image = reader.acquireLatestImage()
+            // ##################################################
+            Log.i(TAG, "Picture taken");
+        }, null)
+
+        val surfaces = listOf(imageReader.surface)
+        this.cameraDevice!!.createCaptureSession(surfaces, object : CameraCaptureSession.StateCallback() {
+            override fun onConfigured(session: CameraCaptureSession) {
+                val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
+                    this?.addTarget(imageReader.surface)
+                }
+                if (captureRequest != null) {
+                    session.capture(captureRequest.build(), null, null)
+                }
+            }
+
+            override fun onConfigureFailed(p0: CameraCaptureSession) {}
+        }, null)
     }
 
     /**********************************************************************************************/

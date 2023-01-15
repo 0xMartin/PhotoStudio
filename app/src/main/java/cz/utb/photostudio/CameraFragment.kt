@@ -1,30 +1,36 @@
 package cz.utb.photostudio
 
+
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import cz.utb.photostudio.camera.CameraService
 import cz.utb.photostudio.databinding.FragmentCameraBinding
+import cz.utb.photostudio.objectdetection.TensorFlowObjDetector
+import org.tensorflow.lite.task.vision.detector.Detection
+import java.util.LinkedList
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class CameraFragment : Fragment() {
+class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
     private var _binding: FragmentCameraBinding? = null
-
-    private var cameraService : CameraService = CameraService()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    private var cameraService : CameraService = CameraService()
+
+    private var objDetector: TensorFlowObjDetector? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,6 +45,15 @@ class CameraFragment : Fragment() {
 
         // spusti servis
         this.cameraService.startService()
+
+        // inicializuje detekci objektu
+        this.objDetector = TensorFlowObjDetector(
+            context = requireContext(),
+            objectDetectorListener = this)
+        this.objDetector?.initObjectDetector(this.binding.textureView)
+
+        // spusti detektor objektu
+        this.objDetector?.runDetector(this.activity!!, 5)
 
         return this.binding.root
     }
@@ -121,7 +136,31 @@ class CameraFragment : Fragment() {
         this.binding.fxWhiteboard.setTextColor(Color.WHITE)
         this.context?.let {
             textView.setTextColor(ContextCompat.getColor(it, R.color.main_color))
-        };
+        }
+    }
+
+    override fun onError(error: String) {
+        activity?.runOnUiThread {
+            Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onResults(
+        results: MutableList<Detection>?,
+        inferenceTime: Long,
+        imageHeight: Int,
+        imageWidth: Int,
+    ) {
+        this.activity?.runOnUiThread {
+            // Pass necessary information to OverlayView for drawing on the canvas
+            this.binding.overlay.setResults(
+                results ?: LinkedList<Detection>(),
+                imageHeight,
+                imageWidth
+            )
+            // Force a redraw
+            this.binding.overlay.invalidate()
+        }
     }
 
 }

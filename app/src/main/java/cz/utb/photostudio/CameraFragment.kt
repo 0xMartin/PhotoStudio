@@ -221,13 +221,15 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
     ) {
         this.activity?.runOnUiThread {
             // Pass necessary information to OverlayView for drawing on the canvas
-            this.binding.overlay.setResults(
-                results ?: LinkedList<Detection>(),
-                imageHeight,
-                imageWidth
-            )
-            // Force a redraw
-            this.binding.overlay.invalidate()
+            try {
+                this.binding.overlay.setResults(
+                    results ?: LinkedList<Detection>(),
+                    imageHeight,
+                    imageWidth
+                )
+                // Force a redraw
+                this.binding.overlay.invalidate()
+            } catch (_ : java.lang.Exception) {}
         }
     }
 

@@ -8,8 +8,14 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import cz.utb.photostudio.databinding.FragmentGalleryBinding
+import cz.utb.photostudio.persistent.AppDatabase
+import cz.utb.photostudio.persistent.ImageFile
+import cz.utb.photostudio.util.ImageListAdapter
 import cz.utb.photostudio.util.getDatePickerDialog
+import kotlinx.coroutines.flow.Flow
+import java.nio.ByteBuffer
 import java.util.Calendar
+import java.util.concurrent.Executors
 
 
 /**
@@ -29,8 +35,10 @@ class GalleryFragment : Fragment() {
     ): View? {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
-        return binding.root
 
+        this.initImageListAdapter()
+
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,5 +75,16 @@ class GalleryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun initImageListAdapter() {
+        Executors.newSingleThreadExecutor().execute {
+            val db: AppDatabase = AppDatabase.getDatabase(context!!)
+            val imgList: List<ImageFile> = db.imageFileDao().getAll()
+            try {
+                val adapter = ImageListAdapter(this.context!!, imgList)
+                binding.images.adapter = adapter
+            } catch (_: java.lang.Exception) { }
+        }
     }
 }

@@ -13,10 +13,10 @@ interface ImageFileDao {
     fun getCount(): Int
 
     @Query("SELECT * FROM image_file")
-    fun getAll(): Flow<List<ImageFile>>
+    fun getAll(): List<ImageFile>
 
     @Query("SELECT * FROM image_file WHERE uid == (:uid)")
-    fun getByIds(uid: Int): Flow<List<ImageFile>>
+    fun getByIds(uid: Int): List<ImageFile>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(image: ImageFile)

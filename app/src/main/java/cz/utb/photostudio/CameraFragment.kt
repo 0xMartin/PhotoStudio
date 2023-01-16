@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
 import cz.utb.photostudio.databinding.FragmentCameraBinding
-import cz.utb.photostudio.objectdetection.TensorFlowObjDetector
+import cz.utb.photostudio.object_detection.TensorFlowObjDetector
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
 import cz.utb.photostudio.service.CameraService
@@ -87,7 +87,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         this.binding.buttonCapture.setOnClickListener {
             try {
                 this.cameraService.takePicture { image ->
-                    Log.i("CAMEAR", "Picture taken")
+                    Log.i("CAMERA", "Picture taken")
                     Log.i("INFO", image.width.toString() + ", " + image.height.toString())
                     Toast.makeText(requireContext(), "Picture taken", Toast.LENGTH_SHORT).show()
                     // ulozeni do lokalni db
@@ -103,7 +103,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                             db.imageFileDao().insert(img)
                             // close img
                             image.close()
-                        }catch (ex: java.lang.Exception) {
+                        } catch (ex: java.lang.Exception) {
                             // close img
                             image.close()
                         }

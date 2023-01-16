@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.utb.photostudio.objectdetection
+package cz.utb.photostudio.object_detection
 
 import android.content.Context
 import android.graphics.Canvas
@@ -24,7 +24,6 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import java.util.LinkedList
-import kotlin.math.max
 import org.tensorflow.lite.task.vision.detector.Detection
 
 class ResultPainter(context: Context, attrs: AttributeSet?) : View(context, attrs) {

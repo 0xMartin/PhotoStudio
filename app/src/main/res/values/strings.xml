@@ -25,4 +25,11 @@
     <string name="apply_and_back">Apply and back</string>
     <string name="object_detection">Object detection</string>
 
+
+    <string-array name="gallery_search_modes">
+        <item>&lt;</item>
+        <item>&gt;</item>
+        <item>&#61;</item>
+    </string-array>
+
 </resources>

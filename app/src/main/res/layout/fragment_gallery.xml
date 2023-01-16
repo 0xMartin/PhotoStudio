@@ -1,11 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GalleryFragment"
-    android:background="@color/black_1">
+    android:background="@color/black_1"
+    android:orientation="vertical"
+    tools:context=".GalleryFragment">
 
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <EditText
+            android:id="@+id/editTextTextPersonName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/gray"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Date"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
+
+        <Spinner
+            android:id="@+id/spinner2"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="@color/white"
+            android:entries="@array/gallery_search_modes"
+            android:foregroundTint="@color/white" />
+
+        <ImageButton
+            android:id="@+id/button_find"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@null"
+            android:src="@drawable/find_icon" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/button_delete"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@null"
+            android:src="@drawable/delete_icon" />
+    </LinearLayout>
+
+    <GridView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:horizontalSpacing="6dp"
+        android:numColumns="2"
+        android:verticalSpacing="6dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp" />
+
+</LinearLayout>

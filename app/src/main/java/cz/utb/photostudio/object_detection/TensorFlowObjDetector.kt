@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.utb.photostudio.objectdetection
+package cz.utb.photostudio.object_detection
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.SystemClock

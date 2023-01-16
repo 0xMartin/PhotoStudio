@@ -20,6 +20,7 @@ import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.object_detection.TensorFlowObjDetector
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
+import cz.utb.photostudio.persistent.ImageIO
 import cz.utb.photostudio.service.CameraService
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
@@ -104,30 +105,29 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         this.binding.buttonCapture.setOnClickListener {
             try {
                 this.cameraService.takePicture { image ->
-                    Log.i("CAMERA", "Picture taken")
-                    Log.i("INFO", image.width.toString() + ", " + image.height.toString())
-                    Toast.makeText(requireContext(), "Picture taken", Toast.LENGTH_SHORT).show()
-                    // ulozeni do lokalni db
+                    // oprazek ulozi na uloziste zarizeni
+                    val path: String = ImageIO.saveImage(this.context!!, image)
+                    // close img
+                    image.close()
+                    // ulozeni informaci do lokalni databaze
                     Executors.newSingleThreadExecutor().execute {
                         try {
                             val db: AppDatabase = AppDatabase.getDatabase(context!!)
-                            val buffer: ByteBuffer = image.planes[0].buffer
                             val img = ImageFile(
                                 db.imageFileDao().getCount(),
                                 "now",
-                                buffer.array()
+                                path
                             )
                             db.imageFileDao().insert(img)
-                            // close img
-                            image.close()
-                        } catch (ex: java.lang.Exception) {
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
                             // close img
                             image.close()
                         }
                     }
                 }
             }catch (ex: java.lang.Exception) {
-                Toast.makeText(requireContext(), "Picture take error", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to take image", Toast.LENGTH_SHORT).show()
             }
         }
 

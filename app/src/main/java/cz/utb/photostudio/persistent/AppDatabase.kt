@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ImageFile::class], version = 1)
+@Database(entities = [ImageFile::class], version = 3, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun imageFileDao(): ImageFileDao
@@ -24,7 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "photostudio_db"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 // return instance
                 instance

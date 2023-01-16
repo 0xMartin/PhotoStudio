@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.TextureView
 import android.view.View
@@ -12,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import cz.utb.photostudio.R
 import cz.utb.photostudio.persistent.ImageFile
+import cz.utb.photostudio.persistent.ImageIO
 
 
 class ImageListAdapter(private val context: Context, private val imageList: List<ImageFile>) : BaseAdapter() {
@@ -24,17 +26,20 @@ class ImageListAdapter(private val context: Context, private val imageList: List
         }
 
         try {
+            Log.i("ImageListAdapter", "$position = ${imageList[position].uid}, ${imageList[position].date}")
             val current: ImageFile = imageList[position]
-            val image: Bitmap = BitmapFactory.decodeByteArray(current.image, 0, current.image.size)
+            val image: Bitmap = ImageIO.loadImage(context, current.imagePath)
 
             val textureView: TextureView? = view?.findViewById(R.id.gallery_item_texture)
 
             val canvas: Canvas? = textureView?.lockCanvas()
-            val rect: Rect = Rect(0, 0, image.width, image.height)
+            val rect = Rect(0, 0, image.width, image.height)
             canvas?.drawBitmap(image, rect, rect, null);
 
             canvas?.let { textureView.unlockCanvasAndPost(it) };
-        } catch (_ : java.lang.Exception) {}
+        } catch (e : java.lang.Exception) {
+            e.printStackTrace()
+        }
 
         return view!!
     }

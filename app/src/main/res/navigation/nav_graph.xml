@@ -12,17 +12,12 @@
         tools:layout="@layout/fragment_camera">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            android:id="@+id/From_Camera_To_Gallery"
             app:destination="@id/GalleryFragment" />
     </fragment>
     <fragment
         android:id="@+id/GalleryFragment"
         android:name="cz.utb.photostudio.GalleryFragment"
         android:label="@string/gallery_fragment_label"
-        tools:layout="@layout/fragment_gallery">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/CameraFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_gallery"/>
 </navigation>

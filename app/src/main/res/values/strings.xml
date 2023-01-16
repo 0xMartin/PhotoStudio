@@ -4,7 +4,7 @@
 
     <!-- Strings used for fragments for navigation -->
     <string name="camera_fragment_label">&#160;Photo Studio</string>
-    <string name="gallery_fragment_label">&#160;Photo Studio - Gallery</string>
+    <string name="gallery_fragment_label">&#160;Gallery</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
@@ -27,9 +27,9 @@
 
 
     <string-array name="gallery_search_modes">
-        <item>&lt;</item>
-        <item>&gt;</item>
-        <item>&#61;</item>
+        <item>Year</item>
+        <item>Month</item>
+        <item>Day</item>
     </string-array>
 
 </resources>

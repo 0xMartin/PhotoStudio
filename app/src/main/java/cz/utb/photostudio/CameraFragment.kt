@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
 import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.object_detection.TensorFlowObjDetector
@@ -38,9 +39,15 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    // kamera servis
     private var cameraService : CameraService = CameraService()
 
+    // detektor objektu
     private var objDetector: TensorFlowObjDetector? = null
+
+    // animace barev tlacitka "take picture"
+    var colorAnimation: ValueAnimator? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,13 +82,23 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         // animace hlavniho tlacitka
         val colorFrom = ContextCompat.getColor(this.context!!, R.color.main_color_transparent)
         val colorTo = ContextCompat.getColor(this.context!!, R.color.main_color)
-        val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo, colorFrom)
-        colorAnimation.duration = 2500 // milliseconds
-        colorAnimation.repeatCount = ValueAnimator.INFINITE
-        colorAnimation.addUpdateListener {
+        this.colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo, colorFrom)
+        this.colorAnimation?.duration = 2500 // milliseconds
+        this.colorAnimation?.repeatCount = ValueAnimator.INFINITE
+        this.colorAnimation?.addUpdateListener {
                 animator -> binding.buttonCapture.backgroundTintList = ColorStateList.valueOf(animator.animatedValue as Int)
         }
-        colorAnimation.start()
+        this.colorAnimation?.start()
+
+        // tlacitko galerie
+        this.binding.buttonGallery.setOnClickListener {
+            this.findNavController().navigate(R.id.From_Camera_To_Gallery)
+        }
+
+        // tlacitko editoru
+        this.binding.buttonEdit.setOnClickListener {
+
+        }
 
         // udela snimek
         this.binding.buttonCapture.setOnClickListener {
@@ -157,6 +174,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
     }
 
     override fun onDestroyView() {
+        this.colorAnimation?.pause()
         this.cameraService.stopService()
         super.onDestroyView()
         this._binding = null
@@ -164,10 +182,12 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
     override fun onResume() {
         super.onResume()
+        this.colorAnimation?.start()
         this.cameraService.startService()
     }
 
     override fun onPause() {
+        this.colorAnimation?.pause()
         this.cameraService.stopService()
         super.onPause()
     }

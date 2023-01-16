@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName="image_file")
 data class ImageFile(
-    @PrimaryKey val uid: Int,
+    @PrimaryKey(autoGenerate = true) val uid: Int,
     @ColumnInfo(name = "date") val date: String,
     @ColumnInfo(name = "image", typeAffinity = ColumnInfo.BLOB) val image: ByteArray
 ) {

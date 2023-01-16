@@ -1,14 +1,11 @@
-package cz.utb.photostudio.camera
+package cz.utb.photostudio.service
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback
 import android.media.Image
 import android.media.ImageReader
-import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -19,7 +16,6 @@ import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.annotation.NonNull
 
 
 class CameraService {
@@ -128,7 +124,6 @@ class CameraService {
         imageReader.setOnImageAvailableListener({ reader ->
             val image = reader.acquireLatestImage()
             onImageCaptured(image)
-            image.close()
             // znovu spusti servis pro snimani obrazu
             startService()
         }, null)

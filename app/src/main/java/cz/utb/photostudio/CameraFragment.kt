@@ -10,17 +10,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
-import cz.utb.photostudio.camera.CameraService
 import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.objectdetection.TensorFlowObjDetector
+import cz.utb.photostudio.persistent.AppDatabase
+import cz.utb.photostudio.persistent.ImageFile
+import cz.utb.photostudio.service.CameraService
+import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.nio.ByteBuffer
 import java.util.*
+import java.util.concurrent.Executors
 
 
 /**
@@ -64,6 +68,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         return this.binding.root
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -85,6 +90,24 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                     Log.i("CAMEAR", "Picture taken")
                     Log.i("INFO", image.width.toString() + ", " + image.height.toString())
                     Toast.makeText(requireContext(), "Picture taken", Toast.LENGTH_SHORT).show()
+                    // ulozeni do lokalni db
+                    Executors.newSingleThreadExecutor().execute {
+                        try {
+                            val db: AppDatabase = AppDatabase.getDatabase(context!!)
+                            val buffer: ByteBuffer = image.planes[0].buffer
+                            val img = ImageFile(
+                                db.imageFileDao().getCount(),
+                                "now",
+                                buffer.array()
+                            )
+                            db.imageFileDao().insert(img)
+                            // close img
+                            image.close()
+                        }catch (ex: java.lang.Exception) {
+                            // close img
+                            image.close()
+                        }
+                    }
                 }
             }catch (ex: java.lang.Exception) {
                 Toast.makeText(requireContext(), "Picture take error", Toast.LENGTH_SHORT).show()

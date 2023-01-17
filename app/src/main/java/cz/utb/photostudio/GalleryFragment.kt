@@ -1,12 +1,15 @@
 package cz.utb.photostudio
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.GridLayout
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import cz.utb.photostudio.databinding.FragmentGalleryBinding
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
@@ -23,6 +26,8 @@ class GalleryFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
 
+    val list = mutableListOf<ImageFile>()
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -34,9 +39,15 @@ class GalleryFragment : Fragment() {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
 
+        val adapter = GalleryListAdapter(requireContext(), list)
+        binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2)
+        binding.recyclerView.adapter = adapter
+        reloadList()
+
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -66,8 +77,6 @@ class GalleryFragment : Fragment() {
         binding.buttonDelete.setOnClickListener {
 
         }
-
-        reloadList()
     }
 
     override fun onDestroyView() {
@@ -79,9 +88,11 @@ class GalleryFragment : Fragment() {
         Executors.newSingleThreadExecutor().execute {
             try {
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
-                val list: List<ImageFile> = db.imageFileDao().getAll()
-                val adapter = GalleryListAdapter(requireContext(), list)
-                binding.recyclerView.adapter = adapter
+                val l: List<ImageFile> = db.imageFileDao().getAll()
+                with(list){
+                    clear()
+                    addAll(l)
+                }
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
             }

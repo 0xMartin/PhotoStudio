@@ -12,6 +12,9 @@ interface ImageFileDao {
     @Query("SELECT COUNT(uid) FROM image_file")
     fun getCount(): Int
 
+    @Query("SELECT COALESCE(MAX(uid), 0) FROM image_file")
+    fun getMaxUid(): Int
+
     @Query("SELECT * FROM image_file")
     fun getAll(): List<ImageFile>
 

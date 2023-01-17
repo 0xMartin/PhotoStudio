@@ -228,7 +228,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 val img = ImageFile(
-                    db.imageFileDao().getCount(),
+                    db.imageFileDao().getMaxUid() + 1,
                     "now",
                     path
                 )

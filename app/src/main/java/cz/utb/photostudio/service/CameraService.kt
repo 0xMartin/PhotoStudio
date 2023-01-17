@@ -302,7 +302,7 @@ class CameraService {
     fun chooseVideoSize(choices: Array<Size>): Size? {
         val smallEnough: MutableList<Size> = ArrayList()
         for (size in choices) {
-            if (size.width == size.height * 4 / 3 && size.width <= 1080) {
+            if (size.width == size.height * 4 / 3 && size.height <= 1080) {
                 smallEnough.add(size)
             }
         }

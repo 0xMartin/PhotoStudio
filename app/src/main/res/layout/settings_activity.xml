@@ -27,6 +27,15 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
+
+        <Switch
+            android:id="@+id/cameraFlash"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cameraFlash"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
     </LinearLayout>
 
     <LinearLayout

@@ -6,7 +6,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +25,6 @@ import cz.utb.photostudio.persistent.ImageIO
 import cz.utb.photostudio.service.CameraService
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
-import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -105,13 +105,11 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         this.binding.buttonCapture.setOnClickListener {
             try {
                 this.cameraService.takePicture { image ->
-                    // oprazek ulozi na uloziste zarizeni
-                    val path: String = ImageIO.saveImage(this.context!!, image)
-                    // close img
-                    image.close()
-                    // ulozeni informaci do lokalni databaze
                     Executors.newSingleThreadExecutor().execute {
                         try {
+                            // oprazek ulozi na uloziste zarizeni
+                            val path: String = ImageIO.saveImage(this.context!!, image)
+                            // ulozeni informaci do lokalni databaze
                             val db: AppDatabase = AppDatabase.getDatabase(context!!)
                             val img = ImageFile(
                                 db.imageFileDao().getCount(),
@@ -119,15 +117,26 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                                 path
                             )
                             db.imageFileDao().insert(img)
+                            Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                                Toast.makeText(context,
+                                    "Picture taken",
+                                    Toast.LENGTH_SHORT).show()
+                            })
                         } catch (e: java.lang.Exception) {
                             e.printStackTrace()
-                            // close img
-                            image.close()
+                            Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                                Toast.makeText(context,
+                                    "Failed to save picture",
+                                    Toast.LENGTH_SHORT).show()
+                            })
                         }
+                        // close img
+                        image.close()
                     }
                 }
             }catch (ex: java.lang.Exception) {
-                Toast.makeText(requireContext(), "Failed to take image", Toast.LENGTH_SHORT).show()
+                ex.printStackTrace()
+                Toast.makeText(context, "Failed to take picture", Toast.LENGTH_SHORT).show()
             }
         }
 

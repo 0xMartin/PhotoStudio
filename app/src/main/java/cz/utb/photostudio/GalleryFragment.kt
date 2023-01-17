@@ -10,9 +10,9 @@ import androidx.fragment.app.Fragment
 import cz.utb.photostudio.databinding.FragmentGalleryBinding
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
-import cz.utb.photostudio.util.ImageListAdapter
+import cz.utb.photostudio.util.GalleryListAdapter
 import cz.utb.photostudio.util.getDatePickerDialog
-import java.util.Calendar
+import java.util.*
 import java.util.concurrent.Executors
 
 
@@ -33,8 +33,6 @@ class GalleryFragment : Fragment() {
     ): View? {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
-
-        this.initImageListAdapter()
 
         return binding.root
     }
@@ -68,6 +66,8 @@ class GalleryFragment : Fragment() {
         binding.buttonDelete.setOnClickListener {
 
         }
+
+        reloadList()
     }
 
     override fun onDestroyView() {
@@ -75,14 +75,17 @@ class GalleryFragment : Fragment() {
         _binding = null
     }
 
-    fun initImageListAdapter() {
+    fun reloadList() {
         Executors.newSingleThreadExecutor().execute {
-            val db: AppDatabase = AppDatabase.getDatabase(context!!)
-            val imgList: List<ImageFile> = db.imageFileDao().getAll()
             try {
-                val adapter = ImageListAdapter(this.context!!, imgList)
-                binding.images.adapter = adapter
-            } catch (_: java.lang.Exception) { }
+                val db: AppDatabase = AppDatabase.getDatabase(context!!)
+                val list: List<ImageFile> = db.imageFileDao().getAll()
+                val adapter = GalleryListAdapter(context!!, list)
+                binding.recyclerView.adapter = adapter
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
         }
     }
+
 }

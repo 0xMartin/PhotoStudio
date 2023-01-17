@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.hardware.camera2.CameraCaptureSession.CaptureCallback
 import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
@@ -16,6 +17,8 @@ import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import android.widget.FrameLayout
 import android.widget.Toast
+import cz.utb.photostudio.config.GlobalConfig
+import java.util.*
 
 
 class CameraService {
@@ -24,22 +27,34 @@ class CameraService {
 
     private val ORIENTATIONS = SparseIntArray()
 
+    // kontext app a textureview pro zobrazovani obrazu z kamery
     private var context: Context? = null
     private var textureView : TextureView? = null
 
+    // velikost snimaneho obrazu
     private var DSI_width: Int = 0
     private var DSI_height: Int = 0
 
+    // kamera
     private var cameraId: String? = null
     private var cameraDevice: CameraDevice? = null
 
+    // capture session
     private var cameraCaptureSessions: CameraCaptureSession? = null
-    private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var imageDimension: Size? = null
 
+    // capture request pro textureview
+    private var captureRequest_Preview: CaptureRequest.Builder? = null
+
+    // image reader - pouzivany pro porizovani sniku z kamery
+    private var imageReader: ImageReader? = null
+    private var taken_picture: Image? = null
+
+    // pro nahled obrazu z kamery
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
 
+    // aktualni zvoleny efekt
     private var effect: Int = CaptureRequest.CONTROL_EFFECT_MODE_OFF
 
     /**********************************************************************************************/
@@ -74,7 +89,7 @@ class CameraService {
             effect == CaptureRequest.CONTROL_EFFECT_MODE_WHITEBOARD ||
             effect == CaptureRequest.CONTROL_EFFECT_MODE_OFF) {
             this.effect = effect
-            applyEffect(captureRequestBuilder)
+            applyEffect(captureRequest_Preview)
             updatePreview()
         }
     }
@@ -111,62 +126,69 @@ class CameraService {
             Log.e(TAG, "CameraDevice is null")
             return
         }
-        if(this.imageDimension == null) {
-            Log.e(TAG, "Image demension is null")
+        if(this.imageReader == null) {
+            Log.e(TAG, "Image Reader is null")
             return
         }
 
-        // zastavi servis pro snimani obrazu
-        this.stopService()
+        // capture request pro snimek
+        val captureBuilder: CaptureRequest.Builder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+        captureBuilder.addTarget(imageReader!!.surface)
+        captureBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+        if(GlobalConfig.CAMERA_FLASH_MODE) {
+            captureBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_SINGLE);
+        } else {
+            captureBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
+        }
+        applyEffect(captureBuilder)
 
-        // snimek obrazu
-        val imageReader: ImageReader = ImageReader.newInstance(imageDimension!!.width, imageDimension!!.height, ImageFormat.JPEG, 2)
-        imageReader.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage()
-            onImageCaptured(image)
-            // znovu spusti servis pro snimani obrazu
-            startService()
-        }, null)
-
-        val surface = imageReader.surface
-        val captureRequest = this.cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-        captureRequest.addTarget(surface)
-        applyEffect(captureRequest)
-        this.cameraDevice!!.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
-            override fun onConfigured(session: CameraCaptureSession) {
-                session.capture(captureRequest.build(), null, null)
+        cameraCaptureSessions?.stopRepeating();
+        cameraCaptureSessions?.abortCaptures();
+        val captureCallback: CaptureCallback = object : CaptureCallback() {
+            override fun onCaptureCompleted(
+                session: CameraCaptureSession,
+                request: CaptureRequest,
+                result: TotalCaptureResult,
+            ) {
+                if(taken_picture != null) {
+                    Log.i(TAG, "Picture taken")
+                    onImageCaptured(taken_picture!!)
+                } else {
+                    Log.i(TAG, "Failed to take picture")
+                }
+                updatePreview()
             }
-            override fun onConfigureFailed(p0: CameraCaptureSession) {
-                // znovu spusti servis pro snimani obrazu
-                startService()
-            }
-        }, null)
+        }
+        cameraCaptureSessions?.capture(captureBuilder.build(), captureCallback, mBackgroundHandler)
+        Log.i(TAG, "Capture request send")
     }
 
     /**********************************************************************************************/
     // PUBLIC SECTION END
     /**********************************************************************************************/
 
-    private fun createCameraPreview() {
+    private fun createCaptureSession() {
         try {
+            //capture request pro priview
             val texture = textureView!!.surfaceTexture!!
             texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
             val surface = Surface(texture)
+            captureRequest_Preview = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            captureRequest_Preview!!.addTarget(surface)
 
-            captureRequestBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            captureRequestBuilder!!.addTarget(surface)
-            applyEffect(captureRequestBuilder)
+            // capture request pro porizovani snimku
+            val cam_surface = imageReader!!.surface
 
-            cameraDevice!!.createCaptureSession(listOf(surface),
+            // vytvori capture session
+            cameraDevice!!.createCaptureSession(listOf(surface, cam_surface),
                 object : CameraCaptureSession.StateCallback() {
                     override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
-                        if (cameraDevice == null) return
                         cameraCaptureSessions = cameraCaptureSession
                         updatePreview()
                     }
 
                     override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
-                        Toast.makeText(context, "Changed", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Failed to init Camera", Toast.LENGTH_SHORT).show()
                     }
                 },
                 null)
@@ -178,9 +200,9 @@ class CameraService {
 
     private fun updatePreview() {
         if (cameraDevice == null) Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
-        captureRequestBuilder!!.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+        captureRequest_Preview!!.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
         try {
-            cameraCaptureSessions!!.setRepeatingRequest(captureRequestBuilder!!.build(),
+            cameraCaptureSessions!!.setRepeatingRequest(captureRequest_Preview!!.build(),
                 null,
                 mBackgroundHandler)
         } catch (e: CameraAccessException) {
@@ -215,12 +237,20 @@ class CameraService {
             val characteristics = manager.getCameraCharacteristics(cameraId!!)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
+
+            val size = map.getOutputSizes(ImageFormat.JPEG).maxByOrNull { it.height * it.width }
+            if (size != null) {
+                imageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 2)
+                imageReader?.setOnImageAvailableListener({ reader ->
+                    this.taken_picture = reader.acquireLatestImage()
+                }, mBackgroundHandler)
+            }
+
             manager.openCamera(cameraId!!, stateCallback, null)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
             return false
         }
-
         return true
     }
 
@@ -248,17 +278,19 @@ class CameraService {
     private var stateCallback: CameraDevice.StateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
             cameraDevice = camera
-            createCameraPreview()
+            createCaptureSession()
             Log.i(TAG, "The camera was opened");
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
             cameraDevice.close()
+            imageReader?.close()
             Log.i(TAG, "The camera was closed");
         }
 
         override fun onError(cameraDevice: CameraDevice, i: Int) {
             cameraDevice.close()
+            imageReader?.close()
             Log.e(TAG, "An error has occured and the camera was closed");
         }
     }

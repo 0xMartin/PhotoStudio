@@ -1,5 +1,6 @@
 package cz.utb.photostudio.service
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
@@ -57,6 +58,8 @@ class CameraService {
     // aktualni zvoleny efekt
     private var effect: Int = CaptureRequest.CONTROL_EFFECT_MODE_OFF
 
+    private var pictureTakeCallback: ((img: Image)->Unit)? = null
+
     /**********************************************************************************************/
     // PUBLIC SECTION START
     /**********************************************************************************************/
@@ -76,6 +79,10 @@ class CameraService {
         this.textureView = textureView
 
         Log.i(TAG, "Service inited.");
+    }
+
+    fun setPictureTakeCallback(callback: (img: Image)->Unit) {
+        this.pictureTakeCallback = callback
     }
 
     fun selectEffect(effect: Int) {
@@ -121,7 +128,7 @@ class CameraService {
     }
 
     @Throws(Exception::class)
-    fun takePicture(onImageCaptured: (image: Image) -> Unit) {
+    fun takePicture() {
         if(this.cameraDevice == null) {
             Log.e(TAG, "CameraDevice is null")
             return
@@ -150,12 +157,7 @@ class CameraService {
                 request: CaptureRequest,
                 result: TotalCaptureResult,
             ) {
-                if(taken_picture != null) {
-                    Log.i(TAG, "Picture taken")
-                    onImageCaptured(taken_picture!!)
-                } else {
-                    Log.i(TAG, "Failed to take picture")
-                }
+                Log.i(TAG, "Picture taken")
                 updatePreview()
             }
         }
@@ -222,6 +224,7 @@ class CameraService {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun openCamera(): Boolean {
         val manager = context!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
         if(manager == null) {
@@ -231,18 +234,20 @@ class CameraService {
         try {
             this.cameraId = manager!!.cameraIdList[0]
             if(cameraId == null) {
-                Log.e(TAG, "Faild to open camera. CameraID is NULL");
+                Log.e(TAG, "Failed to open camera. CameraID is NULL");
                 return false
             }
             val characteristics = manager.getCameraCharacteristics(cameraId!!)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
-            imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
+            imageDimension = chooseVideoSize(map.getOutputSizes(SurfaceTexture::class.java))
+            Log.i("TAG", imageDimension!!.width.toString() + ", " + imageDimension!!.height.toString())
 
             val size = map.getOutputSizes(ImageFormat.JPEG).maxByOrNull { it.height * it.width }
             if (size != null) {
                 imageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 2)
                 imageReader?.setOnImageAvailableListener({ reader ->
                     this.taken_picture = reader.acquireLatestImage()
+                    pictureTakeCallback?.invoke(this.taken_picture!!)
                 }, mBackgroundHandler)
             }
 
@@ -284,14 +289,31 @@ class CameraService {
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
             cameraDevice.close()
-            imageReader?.close()
             Log.i(TAG, "The camera was closed");
         }
 
         override fun onError(cameraDevice: CameraDevice, i: Int) {
             cameraDevice.close()
-            imageReader?.close()
             Log.e(TAG, "An error has occured and the camera was closed");
+        }
+    }
+
+    fun chooseVideoSize(choices: Array<Size>): Size? {
+        val smallEnough: MutableList<Size> = ArrayList()
+        for (size in choices) {
+            if (size.width == size.height * 4 / 3 && size.width <= 1080) {
+                smallEnough.add(size)
+            }
+        }
+        return if (smallEnough.size > 0) {
+            Collections.max(smallEnough, CompareSizeByArea())
+        } else choices[choices.size - 1]
+    }
+
+    class CompareSizeByArea : Comparator<Size?> {
+        override fun compare(lhs: Size?, rhs: Size?): Int {
+            return java.lang.Long.signum(lhs!!.width.toLong() * lhs.height -
+                    rhs!!.width.toLong() * rhs.height)
         }
     }
 

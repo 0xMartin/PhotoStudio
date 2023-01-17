@@ -2,9 +2,11 @@ package cz.utb.photostudio
 
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
+import android.media.Image
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -63,6 +65,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
         // spusti servis
         this.cameraService.startService()
+        this.cameraService.setPictureTakeCallback { img -> this.onPictureTakeEvent(img) }
 
         // inicializuje detekci objektu
         this.objDetector = TensorFlowObjDetector(
@@ -76,13 +79,13 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         return this.binding.root
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // animace hlavniho tlacitka
-        val colorFrom = ContextCompat.getColor(this.context!!, R.color.main_color_transparent)
-        val colorTo = ContextCompat.getColor(this.context!!, R.color.main_color)
+        val colorFrom = ContextCompat.getColor(this.requireContext(), R.color.main_color_transparent)
+        val colorTo = ContextCompat.getColor(this.requireContext(), R.color.main_color)
         this.colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo, colorFrom)
         this.colorAnimation?.duration = 2500 // milliseconds
         this.colorAnimation?.repeatCount = ValueAnimator.INFINITE
@@ -104,36 +107,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         // udela snimek
         this.binding.buttonCapture.setOnClickListener {
             try {
-                this.cameraService.takePicture { image ->
-                    Executors.newSingleThreadExecutor().execute {
-                        try {
-                            // oprazek ulozi na uloziste zarizeni
-                            val path: String = ImageIO.saveImage(this.context!!, image)
-                            // ulozeni informaci do lokalni databaze
-                            val db: AppDatabase = AppDatabase.getDatabase(context!!)
-                            val img = ImageFile(
-                                db.imageFileDao().getCount(),
-                                "now",
-                                path
-                            )
-                            db.imageFileDao().insert(img)
-                            Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                                Toast.makeText(context,
-                                    "Picture taken",
-                                    Toast.LENGTH_SHORT).show()
-                            })
-                        } catch (e: java.lang.Exception) {
-                            e.printStackTrace()
-                            Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                                Toast.makeText(context,
-                                    "Failed to save picture",
-                                    Toast.LENGTH_SHORT).show()
-                            })
-                        }
-                        // close img
-                        image.close()
-                    }
-                }
+                this.cameraService.takePicture()
             }catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
                 Toast.makeText(context, "Failed to take picture", Toast.LENGTH_SHORT).show()
@@ -239,6 +213,37 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 // Force a redraw
                 this.binding.overlay.invalidate()
             } catch (_ : java.lang.Exception) {}
+        }
+    }
+
+    fun onPictureTakeEvent(image: Image) {
+        Executors.newSingleThreadExecutor().execute {
+            try {
+                // oprazek ulozi na uloziste zarizeni
+                val path: String = ImageIO.saveImage(requireContext(), image)
+                // ulozeni informaci do lokalni databaze
+                val db: AppDatabase = AppDatabase.getDatabase(requireContext())
+                val img = ImageFile(
+                    db.imageFileDao().getCount(),
+                    "now",
+                    path
+                )
+                db.imageFileDao().insert(img)
+                Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                    Toast.makeText(context,
+                        "Picture taken",
+                        Toast.LENGTH_SHORT).show()
+                })
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+                Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                    Toast.makeText(context,
+                        "Failed to save picture",
+                        Toast.LENGTH_SHORT).show()
+                })
+            }
+            // close img
+            image.close()
         }
     }
 

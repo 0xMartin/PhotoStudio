@@ -16,17 +16,17 @@ class ImageIO {
         fun saveImage(context: Context, image: Image): String {
             // image to bitmap
             val buffer: ByteBuffer = image.planes[0].buffer
-            val bitmap = Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
-            bitmap.copyPixelsFromBuffer(buffer)
+            val bytes = ByteArray(buffer.remaining())
+            buffer.get(bytes)
 
             // generate random name
             val uuid: UUID = UUID.randomUUID()
-            val fileName = "image_$uuid.png"
+            val fileName = "image_$uuid.jpg"
 
             // ulozi obrazek
             val file = File(context.filesDir, fileName)
             val out = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            out.write(bytes)
             out.flush()
             out.close()
 

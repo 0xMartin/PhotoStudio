@@ -40,7 +40,7 @@ class GalleryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter: ArrayAdapter<*> = ArrayAdapter.createFromResource(this.context!!, R.array.gallery_search_modes, R.layout.spinner_item)
+        val adapter: ArrayAdapter<*> = ArrayAdapter.createFromResource(this.requireContext(), R.array.gallery_search_modes, R.layout.spinner_item)
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.spinner.adapter = adapter
 
@@ -78,9 +78,9 @@ class GalleryFragment : Fragment() {
     fun reloadList() {
         Executors.newSingleThreadExecutor().execute {
             try {
-                val db: AppDatabase = AppDatabase.getDatabase(context!!)
+                val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 val list: List<ImageFile> = db.imageFileDao().getAll()
-                val adapter = GalleryListAdapter(context!!, list)
+                val adapter = GalleryListAdapter(requireContext(), list)
                 binding.recyclerView.adapter = adapter
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()

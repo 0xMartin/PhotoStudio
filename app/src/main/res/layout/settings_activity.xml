@@ -20,6 +20,19 @@
         tools:ignore="MissingConstraints">
 
         <Switch
+            android:id="@+id/cameraFlash"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cameraFlash"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
+
+        <androidx.slidingpanelayout.widget.SlidingPaneLayout
+            android:layout_width="match_parent"
+            android:layout_height="15dp"/>
+
+        <Switch
             android:id="@+id/objDetection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,14 +41,10 @@
             android:textSize="20sp"
             tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
 
-        <Switch
-            android:id="@+id/cameraFlash"
+        <androidx.slidingpanelayout.widget.SlidingPaneLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/cameraFlash"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
+            android:layout_height="15dp"/>
+
     </LinearLayout>
 
     <LinearLayout

@@ -128,7 +128,7 @@ class CameraService {
     }
 
     @Throws(Exception::class)
-    fun takePicture() {
+    fun takePicture(displayRotation: Int) {
         if(this.cameraDevice == null) {
             Log.e(TAG, "CameraDevice is null")
             return
@@ -142,6 +142,7 @@ class CameraService {
         val captureBuilder: CaptureRequest.Builder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
         captureBuilder.addTarget(imageReader!!.surface)
         captureBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+        captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(displayRotation))
         if(GlobalConfig.CAMERA_FLASH_MODE) {
             captureBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_SINGLE);
         } else {

@@ -10,7 +10,9 @@ import android.media.Image
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -107,7 +109,9 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         // udela snimek
         this.binding.buttonCapture.setOnClickListener {
             try {
-                this.cameraService.takePicture()
+                val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
+                Log.i("TAG", rotation.toString())
+                this.cameraService.takePicture(rotation)
             }catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
                 Toast.makeText(context, "Failed to take picture", Toast.LENGTH_SHORT).show()

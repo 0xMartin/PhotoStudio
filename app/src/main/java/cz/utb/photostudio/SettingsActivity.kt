@@ -19,6 +19,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // refresh hodnot ui
         binding.objDetection.isChecked = GlobalConfig.OBJ_DETECTION_ENABLED
+        binding.cameraFlash.isChecked = GlobalConfig.CAMERA_FLASH_MODE
 
         // eventy
         binding.applyAndBack.setOnClickListener {

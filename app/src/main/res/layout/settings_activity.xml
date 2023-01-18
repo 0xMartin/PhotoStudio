@@ -32,6 +32,36 @@
             android:layout_width="match_parent"
             android:layout_height="15dp"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="MissingConstraints"
+            tools:layout_editor_absoluteX="1dp">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/image_quality"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <SeekBar
+                android:id="@+id/pictureQuality"
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:min="1"
+                android:max="100"/>
+        </LinearLayout>
+
+        <androidx.slidingpanelayout.widget.SlidingPaneLayout
+            android:layout_width="match_parent"
+            android:layout_height="15dp"/>
+
         <Switch
             android:id="@+id/objDetection"
             android:layout_width="match_parent"
@@ -41,15 +71,11 @@
             android:textSize="20sp"
             tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
 
-        <androidx.slidingpanelayout.widget.SlidingPaneLayout
-            android:layout_width="match_parent"
-            android:layout_height="15dp"/>
-
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout2"
-        android:layout_width="409dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:gravity="center"

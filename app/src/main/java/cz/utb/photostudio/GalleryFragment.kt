@@ -3,11 +3,12 @@ package cz.utb.photostudio
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.GridLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import cz.utb.photostudio.databinding.FragmentGalleryBinding
@@ -26,11 +27,14 @@ class GalleryFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
 
-    val list = mutableListOf<ImageFile>()
-
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    private val list = mutableListOf<ImageFile>()
+
+    private var galleryListAdapter: GalleryListAdapter? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,9 +43,9 @@ class GalleryFragment : Fragment() {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
 
-        val adapter = GalleryListAdapter(requireContext(), list)
+        this.galleryListAdapter = GalleryListAdapter(requireContext(), list)
         binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2)
-        binding.recyclerView.adapter = adapter
+        binding.recyclerView.adapter = this.galleryListAdapter
         reloadList()
 
         return binding.root
@@ -75,7 +79,19 @@ class GalleryFragment : Fragment() {
 
         // odstraneni vsech dat (mazani je aplikovane na vyber zaznamu)
         binding.buttonDelete.setOnClickListener {
-
+            this.galleryListAdapter?.removeAll()
+            Executors.newSingleThreadExecutor().execute {
+                try {
+                    val db: AppDatabase = AppDatabase.getDatabase(requireContext())
+                    db.imageFileDao().deleteAll()
+                    reloadList()
+                    Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                        binding.recyclerView.invalidate()
+                    })
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
     }
 
@@ -84,13 +100,13 @@ class GalleryFragment : Fragment() {
         _binding = null
     }
 
-    fun reloadList() {
+    private fun reloadList() {
+        this.galleryListAdapter?.removeAll()
         Executors.newSingleThreadExecutor().execute {
             try {
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 val l: List<ImageFile> = db.imageFileDao().getAll()
                 with(list){
-                    clear()
                     addAll(l)
                 }
             } catch (e: java.lang.Exception) {

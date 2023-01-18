@@ -3,8 +3,12 @@ package cz.utb.photostudio.persistent
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.Image
 import android.util.Log
+import android.util.SparseIntArray
+import android.view.Surface
+import cz.utb.photostudio.config.GlobalConfig
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -13,11 +17,26 @@ import java.util.*
 
 class ImageIO {
     companion object {
-        fun saveImage(context: Context, image: Image): String {
+
+        private val ORIENTATIONS = SparseIntArray()
+
+        init {
+            ORIENTATIONS.append(Surface.ROTATION_0, 90)
+            ORIENTATIONS.append(Surface.ROTATION_90, 0)
+            ORIENTATIONS.append(Surface.ROTATION_180, 270)
+            ORIENTATIONS.append(Surface.ROTATION_270, 180)
+        }
+
+        fun saveImage(context: Context, image: Image, rotation: Int): String {
             // image to bitmap
             val buffer: ByteBuffer = image.planes[0].buffer
             val bytes = ByteArray(buffer.remaining())
             buffer.get(bytes)
+
+            val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
+            val matrix = Matrix()
+            matrix.postRotate(ORIENTATIONS.get(rotation).toFloat())
+            val rotatedBitmap: Bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
             // generate random name
             val uuid: UUID = UUID.randomUUID()
@@ -26,7 +45,7 @@ class ImageIO {
             // ulozi obrazek
             val file = File(context.filesDir, fileName)
             val out = FileOutputStream(file)
-            out.write(bytes)
+            rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, GlobalConfig.PICTURE_QUALITY, out)
             out.flush()
             out.close()
 

@@ -13,6 +13,7 @@ import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.util.SparseIntArray
+import android.view.OrientationEventListener
 import android.view.Surface
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
@@ -22,11 +23,10 @@ import cz.utb.photostudio.config.GlobalConfig
 import java.util.*
 
 
+@Suppress("NAME_SHADOWING")
 class CameraService {
 
     private val TAG: String = "CAM_SERVICE"
-
-    private val ORIENTATIONS = SparseIntArray()
 
     // kontext app a textureview pro zobrazovani obrazu z kamery
     private var context: Context? = null
@@ -68,11 +68,6 @@ class CameraService {
         val displayMetrics = context.resources.displayMetrics
         DSI_height = displayMetrics.heightPixels
         DSI_width = displayMetrics.widthPixels
-
-        ORIENTATIONS.append(Surface.ROTATION_0, 90)
-        ORIENTATIONS.append(Surface.ROTATION_90, 0)
-        ORIENTATIONS.append(Surface.ROTATION_180, 270)
-        ORIENTATIONS.append(Surface.ROTATION_270, 180)
 
         this.context = context
         textureView.surfaceTextureListener = textureListener
@@ -128,7 +123,7 @@ class CameraService {
     }
 
     @Throws(Exception::class)
-    fun takePicture(displayRotation: Int) {
+    fun takePicture() {
         if(this.cameraDevice == null) {
             Log.e(TAG, "CameraDevice is null")
             return
@@ -141,8 +136,8 @@ class CameraService {
         // capture request pro snimek
         val captureBuilder: CaptureRequest.Builder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
         captureBuilder.addTarget(imageReader!!.surface)
+        captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, 90);
         captureBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
-        captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(displayRotation))
         if(GlobalConfig.CAMERA_FLASH_MODE) {
             captureBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_SINGLE);
         } else {
@@ -178,6 +173,7 @@ class CameraService {
             val surface = Surface(texture)
             captureRequest_Preview = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             captureRequest_Preview!!.addTarget(surface)
+            applyEffect(captureRequest_Preview)
 
             // capture request pro porizovani snimku
             val cam_surface = imageReader!!.surface
@@ -240,9 +236,12 @@ class CameraService {
             }
             val characteristics = manager.getCameraCharacteristics(cameraId!!)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+
+            // velikost preview
             imageDimension = chooseVideoSize(map.getOutputSizes(SurfaceTexture::class.java))
             Log.i("TAG", imageDimension!!.width.toString() + ", " + imageDimension!!.height.toString())
 
+            // inicializace image readeru pro porizovani snimku
             val size = map.getOutputSizes(ImageFormat.JPEG).maxByOrNull { it.height * it.width }
             if (size != null) {
                 imageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 2)
@@ -299,7 +298,7 @@ class CameraService {
         }
     }
 
-    fun chooseVideoSize(choices: Array<Size>): Size? {
+    private fun chooseVideoSize(choices: Array<Size>): Size? {
         val smallEnough: MutableList<Size> = ArrayList()
         for (size in choices) {
             if (size.width == size.height * 4 / 3 && size.height <= 1080) {
@@ -311,7 +310,7 @@ class CameraService {
         } else choices[choices.size - 1]
     }
 
-    class CompareSizeByArea : Comparator<Size?> {
+    private class CompareSizeByArea : Comparator<Size?> {
         override fun compare(lhs: Size?, rhs: Size?): Int {
             return java.lang.Long.signum(lhs!!.width.toLong() * lhs.height -
                     rhs!!.width.toLong() * rhs.height)

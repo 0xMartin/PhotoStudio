@@ -15,11 +15,11 @@ interface ImageFileDao {
     @Query("SELECT COALESCE(MAX(uid), 0) FROM image_file")
     fun getMaxUid(): Int
 
-    @Query("SELECT * FROM image_file")
+    @Query("SELECT * FROM image_file ORDER BY uid DESC")
     fun getAll(): List<ImageFile>
 
     @Query("SELECT * FROM image_file WHERE uid == (:uid)")
-    fun getByIds(uid: Int): List<ImageFile>
+    fun getById(uid: Int): ImageFile
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(image: ImageFile)

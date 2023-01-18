@@ -5,6 +5,7 @@
     <!-- Strings used for fragments for navigation -->
     <string name="camera_fragment_label">&#160;Photo Studio</string>
     <string name="gallery_fragment_label">&#160;Gallery</string>
+    <string name="image_fragment_label">&#160;Image View</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
@@ -25,6 +26,7 @@
     <string name="apply_and_back">Apply and back</string>
     <string name="object_detection">Object Detection</string>
     <string name="cameraFlash">Camera Flash</string>
+    <string name="image_quality">Image Quality</string>
 
 
     <string-array name="gallery_search_modes">

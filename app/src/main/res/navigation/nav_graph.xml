@@ -19,5 +19,14 @@
         android:id="@+id/GalleryFragment"
         android:name="cz.utb.photostudio.GalleryFragment"
         android:label="@string/gallery_fragment_label"
-        tools:layout="@layout/fragment_gallery"/>
+        tools:layout="@layout/fragment_gallery">
+        <action
+            android:id="@+id/action_GalleryFragment_to_imageFragment"
+            app:destination="@id/imageFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageFragment"
+        android:name="cz.utb.photostudio.ImageFragment"
+        android:label="@string/image_fragment_label"
+        tools:layout="@layout/fragment_image" />
 </navigation>

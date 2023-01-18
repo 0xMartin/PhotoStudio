@@ -109,9 +109,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         // udela snimek
         this.binding.buttonCapture.setOnClickListener {
             try {
-                val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
-                Log.i("TAG", rotation.toString())
-                this.cameraService.takePicture(rotation)
+                this.cameraService.takePicture()
             }catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
                 Toast.makeText(context, "Failed to take picture", Toast.LENGTH_SHORT).show()
@@ -220,11 +218,12 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         }
     }
 
-    fun onPictureTakeEvent(image: Image) {
+    private fun onPictureTakeEvent(image: Image) {
         Executors.newSingleThreadExecutor().execute {
             try {
                 // oprazek ulozi na uloziste zarizeni
-                val path: String = ImageIO.saveImage(requireContext(), image)
+                val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
+                val path: String = ImageIO.saveImage(requireContext(), image, rotation)
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 val img = ImageFile(

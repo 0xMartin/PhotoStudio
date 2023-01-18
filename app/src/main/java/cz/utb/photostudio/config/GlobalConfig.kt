@@ -6,5 +6,7 @@ class GlobalConfig {
         var OBJ_DETECTION_ENABLED: Boolean = false
 
         var CAMERA_FLASH_MODE: Boolean = false
+
+        var PICTURE_QUALITY: Int = 75
     }
 }

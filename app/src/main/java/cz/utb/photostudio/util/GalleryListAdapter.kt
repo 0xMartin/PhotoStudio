@@ -1,6 +1,5 @@
 package cz.utb.photostudio.util
 
-import android.R.attr.data
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import cz.utb.photostudio.ImageFragment
 import cz.utb.photostudio.R
 import cz.utb.photostudio.persistent.ImageFile
-import cz.utb.photostudio.persistent.ImageIO
 import java.util.concurrent.Executors
 
 

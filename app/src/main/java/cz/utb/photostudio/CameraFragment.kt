@@ -10,7 +10,6 @@ import android.media.Image
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
@@ -25,7 +24,7 @@ import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.object_detection.TensorFlowObjDetector
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
-import cz.utb.photostudio.persistent.ImageIO
+import cz.utb.photostudio.util.ImageIO
 import cz.utb.photostudio.service.CameraService
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
@@ -221,13 +220,16 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
     }
 
     private fun onPictureTakeEvent(image: Image) {
+        Toast.makeText(context,
+            "Picture taken",
+            Toast.LENGTH_SHORT).show()
         Executors.newSingleThreadExecutor().execute {
             try {
                 // oprazek ulozi na uloziste zarizeni
                 val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
                 val path: String = ImageIO.saveImage(requireContext(), image, rotation)
                 // cas
-                val formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd. MM. yyyy")
+                val formatter = DateTimeFormatter.ofPattern("dd. MM. yyyy HH:mm:ss")
                 val current = LocalDateTime.now().format(formatter)
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
@@ -237,11 +239,6 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                     path
                 )
                 db.imageFileDao().insert(img)
-                Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                    Toast.makeText(context,
-                        "Picture taken",
-                        Toast.LENGTH_SHORT).show()
-                })
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
                 Handler(Looper.getMainLooper()).post(java.lang.Runnable {

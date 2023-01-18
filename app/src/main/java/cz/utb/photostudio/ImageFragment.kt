@@ -13,7 +13,7 @@ import androidx.navigation.fragment.findNavController
 import cz.utb.photostudio.databinding.FragmentImageBinding
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
-import cz.utb.photostudio.persistent.ImageIO
+import cz.utb.photostudio.util.ImageIO
 import java.util.concurrent.Executors
 
 

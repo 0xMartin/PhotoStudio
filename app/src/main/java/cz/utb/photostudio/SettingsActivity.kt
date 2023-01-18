@@ -27,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
             GlobalConfig.OBJ_DETECTION_ENABLED = binding.objDetection.isChecked
             GlobalConfig.CAMERA_FLASH_MODE = binding.cameraFlash.isChecked
             GlobalConfig.PICTURE_QUALITY = binding.pictureQuality.progress
+            GlobalConfig.storeSettings(baseContext)
             finish()
         }
         binding.back.setOnClickListener {

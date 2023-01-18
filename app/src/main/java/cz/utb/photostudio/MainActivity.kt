@@ -1,19 +1,16 @@
 package cz.utb.photostudio
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import cz.utb.photostudio.config.GlobalConfig
 import cz.utb.photostudio.databinding.ActivityMainBinding
-import cz.utb.photostudio.persistent.AppDatabase
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +29,9 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        // nacte nastaveni z databaze
+        GlobalConfig.loadSetting(baseContext)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

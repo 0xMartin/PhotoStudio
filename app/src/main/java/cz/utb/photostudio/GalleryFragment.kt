@@ -17,6 +17,10 @@ import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
 import cz.utb.photostudio.util.GalleryListAdapter
 import cz.utb.photostudio.util.getDatePickerDialog
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -47,12 +51,12 @@ class GalleryFragment : Fragment() {
         this.galleryListAdapter = GalleryListAdapter(requireContext(), list)
         binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2)
         binding.recyclerView.adapter = this.galleryListAdapter
-        reloadList()
+        reloadList(null)
 
         return binding.root
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "SimpleDateFormat")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -62,15 +66,21 @@ class GalleryFragment : Fragment() {
 
         // vyhledavani
         binding.buttonFind.setOnClickListener {
-
+            val date: LocalDateTime = LocalDateTime.parse(binding.timeSelector.text.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            reloadList(date)
+            Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                binding.recyclerView.invalidate()
+            })
         }
 
         // vyber datumu
+        val current = LocalDateTime.now()
+        binding.timeSelector.text = "${current.year}-${current.month.value}-${current.dayOfMonth}"
         binding.timeSelector.setOnClickListener {
             val calendar: Calendar = Calendar.getInstance()
             val dpd: DatePickerDialog = getDatePickerDialog(this.context,
                 { view, year, month, day ->
-                    binding.timeSelector.text = "$day. $month. $year"
+                    binding.timeSelector.text = "$year-$month-$day"
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -85,7 +95,7 @@ class GalleryFragment : Fragment() {
                 try {
                     val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                     db.imageFileDao().deleteAll()
-                    reloadList()
+                    reloadList(null)
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
                         binding.recyclerView.invalidate()
                     })
@@ -104,14 +114,29 @@ class GalleryFragment : Fragment() {
         _binding = null
     }
 
-    private fun reloadList() {
+    enum class DateSearch {
+        BY_YEAR, BY_MONTH, BY_DAY
+    }
+
+    private fun reloadList(date: LocalDateTime?, search: DateSearch = DateSearch.BY_YEAR) {
         this.galleryListAdapter?.removeAll()
         Executors.newSingleThreadExecutor().execute {
             try {
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
-                val l: List<ImageFile> = db.imageFileDao().getAll()
-                with(list){
-                    addAll(l)
+                if(date == null) {
+                    list.addAll(db.imageFileDao().getAll())
+                } else {
+                    when(search) {
+                        DateSearch.BY_YEAR -> {
+                            list.addAll(db.imageFileDao().searchByYear(date.year))
+                        }
+                        DateSearch.BY_MONTH -> {
+                            list.addAll(db.imageFileDao().searchByMonth(date.year, date.monthValue))
+                        }
+                        DateSearch.BY_DAY -> {
+                            list.addAll(db.imageFileDao().searchByDay(date.year, date.monthValue, date.dayOfMonth))
+                        }
+                    }
                 }
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()

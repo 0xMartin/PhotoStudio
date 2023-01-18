@@ -24,12 +24,10 @@ import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.object_detection.TensorFlowObjDetector
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
-import cz.utb.photostudio.util.ImageIO
 import cz.utb.photostudio.service.CameraService
+import cz.utb.photostudio.util.ImageIO
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -229,8 +227,14 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
                 val path: String = ImageIO.saveImage(requireContext(), image, rotation)
                 // cas
-                val formatter = DateTimeFormatter.ofPattern("dd. MM. yyyy HH:mm:ss")
-                val current = LocalDateTime.now().format(formatter)
+                val calendar = Calendar.getInstance()
+                calendar.toString()
+                var current = calendar.get(Calendar.YEAR).toString() + "-"
+                current += calendar.get(Calendar.MONTH).toString() + "-"
+                current += calendar.get(Calendar.DAY_OF_MONTH).toString() + " "
+                current += calendar.get(Calendar.HOUR).toString() + ":"
+                current += calendar.get(Calendar.MINUTE).toString() + ":"
+                current += calendar.get(Calendar.SECOND).toString()
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 val img = ImageFile(

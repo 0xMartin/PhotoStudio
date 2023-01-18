@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ImageFileDao {
@@ -17,6 +16,15 @@ interface ImageFileDao {
 
     @Query("SELECT * FROM image_file ORDER BY uid DESC")
     fun getAll(): List<ImageFile>
+
+    @Query("SELECT * FROM image_file WHERE CAST(strftime('%Y', date) as decimal) == (:year) ORDER BY uid DESC")
+    fun searchByYear(year: Int): List<ImageFile>
+
+    @Query("SELECT * FROM image_file WHERE CAST(strftime('%Y', date) as decimal) == (:year) AND CAST(strftime('%m', date) as decimal) == (:month) ORDER BY uid DESC")
+    fun searchByMonth(year:Int, month: Int): List<ImageFile>
+
+    @Query("SELECT * FROM image_file WHERE CAST(strftime('%Y', date) as decimal) == (:year) AND CAST(strftime('%m', date) as decimal) == (:month) AND CAST(strftime('%d', date) as decimal) == (:day) ORDER BY uid DESC")
+    fun searchByDay(year:Int, month: Int, day: Int): List<ImageFile>
 
     @Query("SELECT * FROM image_file WHERE uid == (:uid)")
     fun getById(uid: Int): ImageFile

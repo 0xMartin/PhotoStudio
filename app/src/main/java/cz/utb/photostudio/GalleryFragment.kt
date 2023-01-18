@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -17,7 +18,6 @@ import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
 import cz.utb.photostudio.util.GalleryListAdapter
 import cz.utb.photostudio.util.getDatePickerDialog
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -66,21 +66,24 @@ class GalleryFragment : Fragment() {
 
         // vyhledavani
         binding.buttonFind.setOnClickListener {
-            val date: LocalDateTime = LocalDateTime.parse(binding.timeSelector.text.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            reloadList(date)
-            Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                binding.recyclerView.invalidate()
-            })
+            val date: LocalDate = LocalDate.parse(binding.timeSelector.text.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            var mode: DateSearch = DateSearch.BY_YEAR
+            when((binding.spinner.selectedView as TextView).text.toString()) {
+                "Year" -> mode = DateSearch.BY_YEAR
+                "Month" -> mode = DateSearch.BY_MONTH
+                "Day" -> mode = DateSearch.BY_DAY
+            }
+            reloadList(date, mode)
         }
 
         // vyber datumu
         val current = LocalDateTime.now()
-        binding.timeSelector.text = "${current.year}-${current.month.value}-${current.dayOfMonth}"
+        binding.timeSelector.text = "${"%02d".format(current.year)}-${"%02d".format(current.monthValue)}-${"%02d".format(current.dayOfYear)}"
         binding.timeSelector.setOnClickListener {
             val calendar: Calendar = Calendar.getInstance()
             val dpd: DatePickerDialog = getDatePickerDialog(this.context,
                 { view, year, month, day ->
-                    binding.timeSelector.text = "$year-$month-$day"
+                    binding.timeSelector.text = "${"%02d".format(year)}-${"%02d".format(month + 1)}-${"%02d".format(day)}"
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -96,9 +99,6 @@ class GalleryFragment : Fragment() {
                     val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                     db.imageFileDao().deleteAll()
                     reloadList(null)
-                    Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                        binding.recyclerView.invalidate()
-                    })
                 } catch (e: java.lang.Exception) {
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
                         Toast.makeText(requireContext(), "Failed to delete images", Toast.LENGTH_SHORT).show()
@@ -118,7 +118,7 @@ class GalleryFragment : Fragment() {
         BY_YEAR, BY_MONTH, BY_DAY
     }
 
-    private fun reloadList(date: LocalDateTime?, search: DateSearch = DateSearch.BY_YEAR) {
+    private fun reloadList(date: LocalDate?, search: DateSearch = DateSearch.BY_YEAR) {
         this.galleryListAdapter?.removeAll()
         Executors.newSingleThreadExecutor().execute {
             try {

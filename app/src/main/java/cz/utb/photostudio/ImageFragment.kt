@@ -5,19 +5,17 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import cz.utb.photostudio.databinding.FragmentImageBinding
 import cz.utb.photostudio.persistent.AppDatabase
 import cz.utb.photostudio.persistent.ImageFile
 import cz.utb.photostudio.util.ImageIO
-import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -71,7 +69,7 @@ class ImageFragment : Fragment() {
                     val image: ImageFile = img_uid?.let { db.imageFileDao().getById(it) } ?: return@execute
                     db.imageFileDao().delete(image)
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                        findNavController().navigate(R.id.action_imageFragment_to_GalleryFragment)
+                        findNavController().popBackStack()
                     })
                 } catch (e: java.lang.Exception) {
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
@@ -90,10 +88,12 @@ class ImageFragment : Fragment() {
                 val bitmap: Bitmap? = ImageIO.loadImage(requireContext(), image.imagePath)
                 bitmap?.let {
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
-                        Log.i(">>>>>>", image.date)
-                        val date: LocalDateTime = LocalDateTime.parse(image.date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                        binding.textView.text = "${date.dayOfMonth}. ${date.month.value}. ${date.year} ${date.hour}:${date.month}:${date.second}"
-                        binding.imageView.setImageBitmap(bitmap)
+                        try {
+                            val date: LocalDateTime = LocalDateTime.parse(image.date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                            binding.textView.text = "${date.dayOfMonth}. ${date.monthValue}. ${date.year} " +
+                                    "${"%02d".format(date.hour)}:${"%02d".format(date.minute)}:${"%02d".format(date.second)}"
+                            binding.imageView.setImageBitmap(bitmap)
+                        } catch (_: java.lang.Exception) {}
                     })
                 }
             } catch (e: java.lang.Exception) {

@@ -12,7 +12,5 @@ fun getDatePickerDialog(
     month: Int,
     day: Int,
 ): DatePickerDialog {
-    val dpd = DatePickerDialog(context!!, listener, year, month, day)
-    dpd.datePicker.minDate = System.currentTimeMillis() - 1000
-    return dpd
+    return DatePickerDialog(context!!, listener, year, month, day)
 }

@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import cz.utb.photostudio.databinding.FragmentGalleryBinding
@@ -89,6 +90,9 @@ class GalleryFragment : Fragment() {
                         binding.recyclerView.invalidate()
                     })
                 } catch (e: java.lang.Exception) {
+                    Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                        Toast.makeText(requireContext(), "Failed to delete images", Toast.LENGTH_SHORT).show()
+                    })
                     e.printStackTrace()
                 }
             }

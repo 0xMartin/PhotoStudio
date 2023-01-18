@@ -28,5 +28,9 @@
         android:id="@+id/imageFragment"
         android:name="cz.utb.photostudio.ImageFragment"
         android:label="@string/image_fragment_label"
-        tools:layout="@layout/fragment_image" />
+        tools:layout="@layout/fragment_image" >
+        <action
+            android:id="@+id/action_imageFragment_to_GalleryFragment"
+            app:destination="@id/GalleryFragment" />
+    </fragment>
 </navigation>

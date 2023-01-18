@@ -29,6 +29,8 @@ import cz.utb.photostudio.persistent.ImageIO
 import cz.utb.photostudio.service.CameraService
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -224,11 +226,14 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 // oprazek ulozi na uloziste zarizeni
                 val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
                 val path: String = ImageIO.saveImage(requireContext(), image, rotation)
+                // cas
+                val formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd. MM. yyyy")
+                val current = LocalDateTime.now().format(formatter)
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 val img = ImageFile(
                     db.imageFileDao().getMaxUid() + 1,
-                    "now",
+                    current,
                     path
                 )
                 db.imageFileDao().insert(img)

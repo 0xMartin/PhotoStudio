@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import cz.utb.photostudio.R
+import cz.utb.photostudio.util.CustomSeekBar
 
 
 class Contrast(contrast: Float = 0.5f) : Filter() {
@@ -56,6 +57,9 @@ class Contrast(contrast: Float = 0.5f) : Filter() {
         return newBitmap
     }
 
+    /**
+     * Fragment pro ovladani filtru
+     */
     class FilterFragment : Fragment() {
         var contrastChanged: ((c: Float)->Unit)? = null
         override fun onCreateView(
@@ -63,11 +67,12 @@ class Contrast(contrast: Float = 0.5f) : Filter() {
             savedInstanceState: Bundle?,
         ): View? {
             val view: View = inflater.inflate(R.layout.filter_contrast, container, false)
-            val seekBar: SeekBar = view.findViewById(R.id.seekBar)
+            val seekBar: CustomSeekBar = view.findViewById(R.id.seekBar)
+            seekBar.fromCenter = true
             seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                     p0?.let {
-                        contrastChanged?.invoke(p0.progress / 100.0f)
+                        contrastChanged?.invoke(p0.progress / 100.0f * 2.0f - 1.0f)
                     }
                 }
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -75,8 +80,6 @@ class Contrast(contrast: Float = 0.5f) : Filter() {
             })
             return view
         }
-
-
     }
 
 }

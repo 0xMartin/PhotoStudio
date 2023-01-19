@@ -50,12 +50,13 @@
                 android:textColor="@color/white"
                 android:textSize="20sp" />
 
-            <SeekBar
+            <cz.utb.photostudio.util.CustomSeekBar
                 android:id="@+id/pictureQuality"
                 android:layout_width="200dp"
                 android:layout_height="match_parent"
                 android:min="1"
-                android:max="100"/>
+                android:max="100"
+                android:progressDrawable="@android:color/transparent"/>
         </LinearLayout>
 
         <androidx.slidingpanelayout.widget.SlidingPaneLayout

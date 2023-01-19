@@ -60,7 +60,7 @@ class CameraService {
     private var effect: Int = CaptureRequest.CONTROL_EFFECT_MODE_OFF
 
     // callback pro porizeni sniku a zpracovani obrazu pomici ai
-    private var pictureTakeCallback: ((img: Image)->Unit)? = null
+    private var takePictureCallback: ((img: Image)->Unit)? = null
 
     var copyBitmap: Bitmap? = null
     private var previewChangedCallback: ((bitmap: Bitmap)->Unit)? = null
@@ -81,8 +81,8 @@ class CameraService {
         Log.i(TAG, "Service inited.");
     }
 
-    fun setPictureTakeCallback(callback: (img: Image)->Unit) {
-        this.pictureTakeCallback = callback
+    fun setTakePictureCallback(callback: (img: Image)->Unit) {
+        this.takePictureCallback = callback
     }
 
     fun setPreviewChangedCallBack(callback: (bitmap: Bitmap)->Unit) {
@@ -256,7 +256,7 @@ class CameraService {
             if (size != null) {
                 imageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 1)
                 imageReader?.setOnImageAvailableListener({ reader ->
-                    pictureTakeCallback?.invoke(reader.acquireLatestImage())
+                    takePictureCallback?.invoke(reader.acquireLatestImage())
                 }, mBackgroundHandler)
             }
 

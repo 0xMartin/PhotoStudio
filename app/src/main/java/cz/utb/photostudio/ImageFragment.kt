@@ -9,8 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import cz.utb.photostudio.databinding.FragmentImageBinding
 import cz.utb.photostudio.persistent.AppDatabase
@@ -58,7 +60,8 @@ class ImageFragment : Fragment() {
 
         // spusti editor pro tento obrazek
         binding.edit.setOnClickListener {
-
+            val bundle = bundleOf(EditorFragment.ARG_IMG_UID to this.img_uid)
+            findNavController().navigate(R.id.action_imageFragment_to_editorFragment, bundle)
         }
 
         // odstraneni tohoto obrazku

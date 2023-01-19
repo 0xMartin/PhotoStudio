@@ -14,6 +14,9 @@
         <action
             android:id="@+id/From_Camera_To_Gallery"
             app:destination="@id/GalleryFragment" />
+        <action
+            android:id="@+id/action_CameraFragment_to_editorFragment"
+            app:destination="@id/editorFragment" />
     </fragment>
     <fragment
         android:id="@+id/GalleryFragment"
@@ -28,5 +31,13 @@
         android:id="@+id/imageFragment"
         android:name="cz.utb.photostudio.ImageFragment"
         android:label="@string/image_fragment_label"
-        tools:layout="@layout/fragment_image" />
+        tools:layout="@layout/fragment_image" >
+        <action
+            android:id="@+id/action_imageFragment_to_editorFragment"
+            app:destination="@id/editorFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editorFragment"
+        android:name="cz.utb.photostudio.EditorFragment"
+        android:label="@string/editor_fragment_label" />
 </navigation>

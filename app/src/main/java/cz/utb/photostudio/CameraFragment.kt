@@ -67,7 +67,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
         // inicializuje servis kamery a nastavi callbacky
         this.cameraService.initService(requireContext(), this.binding.textureView)
-        this.cameraService.setPictureTakeCallback { img -> this.onPictureTakeEvent(img) }
+        this.cameraService.setTakePictureCallback { img -> this.onTakePictureEvent(img) }
         this.cameraService.setPreviewChangedCallBack { bitmap -> this.onDetectObjects(bitmap) }
 
         // spusti servis
@@ -104,7 +104,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
         // tlacitko editoru
         this.binding.buttonEdit.setOnClickListener {
-
+            this.findNavController().navigate(R.id.action_CameraFragment_to_editorFragment)
         }
 
         // udela snimek
@@ -227,7 +227,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         }
     }
 
-    val executor = Executors.newFixedThreadPool(20)
+    val executor = Executors.newFixedThreadPool(5)
 
     private fun onDetectObjects(bitmap: Bitmap) {
         if(GlobalConfig.OBJ_DETECTION_ENABLED) {
@@ -242,7 +242,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         }
     }
 
-    private fun onPictureTakeEvent(image: Image) {
+    private fun onTakePictureEvent(image: Image) {
         Toast.makeText(context,
             "Picture taken",
             Toast.LENGTH_SHORT).show()

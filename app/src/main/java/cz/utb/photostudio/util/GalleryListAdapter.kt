@@ -64,6 +64,16 @@ class GalleryListAdapter(context: Context, dataList: List<ImageFile>) : Recycler
         }
     }
 
+    fun insertAll(list: List<ImageFile>)
+    {
+        for(img in list) {
+            with(dataList as MutableList){
+                add(img)
+            }
+            notifyItemInserted(dataList.size - 1)
+        }
+    }
+
     override fun getItemCount(): Int {
         return dataList.size
     }

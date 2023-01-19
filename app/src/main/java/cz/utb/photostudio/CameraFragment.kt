@@ -4,12 +4,15 @@ package cz.utb.photostudio
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
 import android.media.Image
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
@@ -20,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
+import cz.utb.photostudio.config.GlobalConfig
 import cz.utb.photostudio.databinding.FragmentCameraBinding
 import cz.utb.photostudio.object_detection.TensorFlowObjDetector
 import cz.utb.photostudio.persistent.AppDatabase
@@ -28,6 +32,7 @@ import cz.utb.photostudio.service.CameraService
 import cz.utb.photostudio.util.ImageIO
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.Executors
@@ -60,23 +65,19 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
     ): View? {
         this._binding = FragmentCameraBinding.inflate(inflater, container, false)
 
-        // inicializuje kamera servis
-        this.context?.let {
-            this.cameraService.initService(it, this.binding.textureView)
-        }
+        // inicializuje servis kamery a nastavi callbacky
+        this.cameraService.initService(requireContext(), this.binding.textureView)
+        this.cameraService.setPictureTakeCallback { img -> this.onPictureTakeEvent(img) }
+        this.cameraService.setPreviewChangedCallBack { bitmap -> this.onDetectObjects(bitmap) }
 
         // spusti servis
         this.cameraService.startService()
-        this.cameraService.setPictureTakeCallback { img -> this.onPictureTakeEvent(img) }
 
         // inicializuje detekci objektu
         this.objDetector = TensorFlowObjDetector(
             context = requireContext(),
             objectDetectorListener = this)
-        this.objDetector?.initObjectDetector(this.binding.textureView)
-
-        // spusti detektor objektu
-        this.objDetector?.runDetector(5)
+        this.objDetector?.initObjectDetector()
 
         return this.binding.root
     }
@@ -169,6 +170,14 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
         super.onResume()
         this.colorAnimation?.start()
         this.cameraService.startService()
+
+        // pokud je povolena detekce objektu vyzada si novy snimek nahledu obrazu u servisu kamery
+        if(GlobalConfig.OBJ_DETECTION_ENABLED) {
+            this.cameraService.requestNextImageOfPreview()
+        } else {
+            // pokud ne tak provede clear overlayer vrstvy s vysledakama detekce
+            this.binding.overlay.clear()
+        }
     }
 
     override fun onPause() {
@@ -215,6 +224,21 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 // Force a redraw
                 this.binding.overlay.invalidate()
             } catch (_ : java.lang.Exception) {}
+        }
+    }
+
+    val executor = Executors.newFixedThreadPool(20)
+
+    private fun onDetectObjects(bitmap: Bitmap) {
+        if(GlobalConfig.OBJ_DETECTION_ENABLED) {
+            this.executor.submit {
+                try {
+                    this.objDetector?.detect(bitmap, 0)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                this.cameraService.requestNextImageOfPreview()
+            }
         }
     }
 

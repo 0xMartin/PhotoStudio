@@ -90,7 +90,7 @@ class ImageFragment : Fragment() {
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
                         try {
                             val date: LocalDateTime = LocalDateTime.parse(image.date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                            binding.textView.text = "${date.dayOfMonth}. ${date.monthValue}. ${date.year} " +
+                            binding.textView.text = "${date.dayOfMonth}. ${date.monthValue}. ${date.year} - " +
                                     "${"%02d".format(date.hour)}:${"%02d".format(date.minute)}:${"%02d".format(date.second)}"
                             binding.imageView.setImageBitmap(bitmap)
                         } catch (_: java.lang.Exception) {}

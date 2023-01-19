@@ -36,8 +36,6 @@ class GalleryFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val list = mutableListOf<ImageFile>()
-
     private var galleryListAdapter: GalleryListAdapter? = null
 
 
@@ -48,7 +46,7 @@ class GalleryFragment : Fragment() {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
 
-        this.galleryListAdapter = GalleryListAdapter(requireContext(), list)
+        this.galleryListAdapter = GalleryListAdapter(requireContext(), mutableListOf<ImageFile>())
         binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2)
         binding.recyclerView.adapter = this.galleryListAdapter
         reloadList(null)
@@ -123,21 +121,25 @@ class GalleryFragment : Fragment() {
         Executors.newSingleThreadExecutor().execute {
             try {
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
+                var list: List<ImageFile>? = null
                 if(date == null) {
-                    list.addAll(db.imageFileDao().getAll())
+                    list = db.imageFileDao().getAll()
                 } else {
                     when(search) {
                         DateSearch.BY_YEAR -> {
-                            list.addAll(db.imageFileDao().searchByYear(date.year))
+                            list = db.imageFileDao().searchByYear(date.year)
                         }
                         DateSearch.BY_MONTH -> {
-                            list.addAll(db.imageFileDao().searchByMonth(date.year, date.monthValue))
+                            list = db.imageFileDao().searchByMonth(date.year, date.monthValue)
                         }
                         DateSearch.BY_DAY -> {
-                            list.addAll(db.imageFileDao().searchByDay(date.year, date.monthValue, date.dayOfMonth))
+                            list = db.imageFileDao().searchByDay(date.year, date.monthValue, date.dayOfMonth)
                         }
                     }
                 }
+                Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                    this.galleryListAdapter?.insertAll(list)
+                })
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
             }

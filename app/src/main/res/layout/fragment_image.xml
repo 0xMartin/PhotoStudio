@@ -53,30 +53,20 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/linearLayout3"
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:text="@string/date_not_set"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_margin="8dp"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="1dp">
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="11. 11. 1999"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-    </LinearLayout>
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"/>
+
 
 </LinearLayout>

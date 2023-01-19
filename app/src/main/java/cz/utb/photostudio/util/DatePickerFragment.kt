@@ -12,5 +12,7 @@ fun getDatePickerDialog(
     month: Int,
     day: Int,
 ): DatePickerDialog {
-    return DatePickerDialog(context!!, listener, year, month, day)
+    val dpd = DatePickerDialog(context!!, listener, year, month, day)
+    dpd.datePicker.maxDate = System.currentTimeMillis() + 1000
+    return dpd
 }

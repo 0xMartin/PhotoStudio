@@ -17,6 +17,8 @@ package cz.utb.photostudio.object_detection
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.TextureView
@@ -43,20 +45,12 @@ class TensorFlowObjDetector(
     // will not change, a lazy val would be preferable.
     private var objectDetector: ObjectDetector? = null
 
-    private var running: Boolean = false
-    private var textureView: TextureView? = null
-
-    fun clearObjectDetector() {
-        running = false
-        objectDetector = null
-    }
 
     // Initialize the object detector using current settings on the
     // thread that is using it. CPU and NNAPI delegates can be used with detectors
     // that are created on the main thread and used on a background thread, but
     // the GPU delegate needs to be used on the thread that initialized the detector
-    fun initObjectDetector(textureView: TextureView) {
-        this.textureView = textureView
+    fun initObjectDetector() {
         // Create the base options for the detector using specifies max results and score threshold
         val optionsBuilder =
             ObjectDetector.ObjectDetectorOptions.builder()
@@ -94,24 +88,6 @@ class TensorFlowObjDetector(
             )
             Log.e("Test", "TFLite failed to load model with error: " + e.message)
         }
-    }
-
-    fun runDetector(ups: Int) {
-        running = true
-        Thread(Runnable {
-            while (running) {
-                Thread.sleep((1000.0f / ups).toLong())
-                if(GlobalConfig.OBJ_DETECTION_ENABLED) {
-                    try {
-                        // Pass Bitmap and rotation to the object detector helper for processing and detection
-                        this.textureView?.bitmap?.let {
-                            detect(it, 0)
-                        }
-                    } catch (_: Exception) {
-                    }
-                }
-            }
-        }).start()
     }
 
     fun detect(image: Bitmap, imageRotation: Int) {

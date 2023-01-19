@@ -28,7 +28,7 @@ import org.tensorflow.lite.task.vision.detector.Detection
 
 class ResultPainter(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
-    private var results: List<Detection> = LinkedList<Detection>()
+    private var results: List<Detection>? = LinkedList<Detection>()
     private var boxPaint = Paint()
     private var textBackgroundPaint = Paint()
     private var textPaint = Paint()
@@ -46,6 +46,7 @@ class ResultPainter(context: Context, attrs: AttributeSet?) : View(context, attr
     }
 
     fun clear() {
+        results = null
         textPaint.reset()
         textBackgroundPaint.reset()
         boxPaint.reset()
@@ -70,7 +71,8 @@ class ResultPainter(context: Context, attrs: AttributeSet?) : View(context, attr
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
-        for (result in results) {
+        if(results == null) return
+        for (result in results!!) {
             val boundingBox = result.boundingBox
 
             val top = boundingBox.top * scaleFactor

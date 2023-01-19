@@ -2,6 +2,7 @@ package cz.utb.photostudio.service
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
@@ -40,25 +41,29 @@ class CameraService {
     private var cameraId: String? = null
     private var cameraDevice: CameraDevice? = null
 
+    /********************************************************************************/
     // capture session
     private var cameraCaptureSessions: CameraCaptureSession? = null
     private var imageDimension: Size? = null
 
     // capture request pro textureview
     private var captureRequest_Preview: CaptureRequest.Builder? = null
-
     // image reader - pouzivany pro porizovani sniku z kamery
     private var imageReader: ImageReader? = null
-    private var taken_picture: Image? = null
+    /********************************************************************************/
 
-    // pro nahled obrazu z kamery
+    // vlakno pro obnovovani obrazu z kamery
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
 
     // aktualni zvoleny efekt
     private var effect: Int = CaptureRequest.CONTROL_EFFECT_MODE_OFF
 
+    // callback pro porizeni sniku a zpracovani obrazu pomici ai
     private var pictureTakeCallback: ((img: Image)->Unit)? = null
+
+    var copyBitmap: Bitmap? = null
+    private var previewChangedCallback: ((bitmap: Bitmap)->Unit)? = null
 
     /**********************************************************************************************/
     // PUBLIC SECTION START
@@ -78,6 +83,14 @@ class CameraService {
 
     fun setPictureTakeCallback(callback: (img: Image)->Unit) {
         this.pictureTakeCallback = callback
+    }
+
+    fun setPreviewChangedCallBack(callback: (bitmap: Bitmap)->Unit) {
+        this.previewChangedCallback = callback
+    }
+
+    fun requestNextImageOfPreview() {
+        this.copyBitmap = null
     }
 
     fun selectEffect(effect: Int) {
@@ -175,11 +188,8 @@ class CameraService {
             captureRequest_Preview!!.addTarget(surface)
             applyEffect(captureRequest_Preview)
 
-            // capture request pro porizovani snimku
-            val cam_surface = imageReader!!.surface
-
             // vytvori capture session
-            cameraDevice!!.createCaptureSession(listOf(surface, cam_surface),
+            cameraDevice!!.createCaptureSession(listOf(surface, imageReader!!.surface),
                 object : CameraCaptureSession.StateCallback() {
                     override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
                         cameraCaptureSessions = cameraCaptureSession
@@ -229,7 +239,7 @@ class CameraService {
             return false
         }
         try {
-            this.cameraId = manager!!.cameraIdList[0]
+            this.cameraId = manager.cameraIdList[0]
             if(cameraId == null) {
                 Log.e(TAG, "Failed to open camera. CameraID is NULL");
                 return false
@@ -239,15 +249,14 @@ class CameraService {
 
             // velikost preview
             imageDimension = chooseVideoSize(map.getOutputSizes(SurfaceTexture::class.java))
-            Log.i("TAG", imageDimension!!.width.toString() + ", " + imageDimension!!.height.toString())
+            Log.i(TAG, "PREVIEW SIZE: " + imageDimension!!.width.toString() + ", " + imageDimension!!.height.toString())
 
             // inicializace image readeru pro porizovani snimku
             val size = map.getOutputSizes(ImageFormat.JPEG).maxByOrNull { it.height * it.width }
             if (size != null) {
-                imageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 2)
+                imageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 1)
                 imageReader?.setOnImageAvailableListener({ reader ->
-                    this.taken_picture = reader.acquireLatestImage()
-                    pictureTakeCallback?.invoke(this.taken_picture!!)
+                    pictureTakeCallback?.invoke(reader.acquireLatestImage())
                 }, mBackgroundHandler)
             }
 
@@ -267,16 +276,25 @@ class CameraService {
     private var textureListener: SurfaceTextureListener = object : SurfaceTextureListener {
         override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, i: Int, i1: Int) {
             openCamera()
+            setAspectRatioTextureView(imageDimension!!.width, imageDimension!!.height)
         }
 
-        override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, i: Int, i1: Int) {}
+        override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, i: Int, i1: Int) {
+            setAspectRatioTextureView(imageDimension!!.width, imageDimension!!.height)
+        }
 
         override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
             return false
         }
 
         override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
-            setAspectRatioTextureView(imageDimension!!.width, imageDimension!!.height)
+            // get the bitmap data of the TextureView
+            if(copyBitmap != null) return
+            val bitmap: Bitmap? = textureView!!.bitmap
+            if (bitmap != null) {
+                copyBitmap = bitmap.copy(bitmap.config, true)
+                previewChangedCallback?.invoke(copyBitmap!!)
+            }
         }
     }
 

@@ -47,7 +47,6 @@ class ImageIO {
             val buffer: ByteBuffer = image.planes[0].buffer
             val bytes = ByteArray(buffer.remaining())
             buffer.get(bytes)
-
             val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
             val matrix = Matrix()
             matrix.postRotate(ORIENTATIONS.get(rotation).toFloat())

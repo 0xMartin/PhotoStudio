@@ -24,7 +24,6 @@ import cz.utb.photostudio.config.GlobalConfig
 import java.util.*
 
 
-@Suppress("NAME_SHADOWING")
 class CameraService {
 
     private val TAG: String = "CAM_SERVICE"

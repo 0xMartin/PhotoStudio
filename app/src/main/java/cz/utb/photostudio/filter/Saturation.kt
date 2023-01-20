@@ -17,7 +17,8 @@ class Saturation(name: String, saturation: Float = 1.0f) : Filter(name) {
 
     init {
         this.saturation = saturation
-        this.fragment = FilterFragment()
+        this.fragment = FilterFragment(this.saturation)
+        this.fragment?.refresh(this.saturation)
         this.fragment!!.saturationChanged = { c ->
             this.saturation = c
             this.changed?.invoke()
@@ -38,6 +39,7 @@ class Saturation(name: String, saturation: Float = 1.0f) : Filter(name) {
 
     override fun reset() {
         this.saturation = 1.0f
+        this.fragment?.refresh(this.saturation)
     }
 
     private fun adjustSaturation(matrix: ColorMatrix, saturation: Float) {
@@ -49,16 +51,25 @@ class Saturation(name: String, saturation: Float = 1.0f) : Filter(name) {
     /**
      * Fragment pro ovladani filtru
      */
-    class FilterFragment : Fragment() {
+    class FilterFragment(saturation: Float) : Fragment() {
+
         var saturationChanged: ((c: Float)->Unit)? = null
+
+        private var seekBar: CustomSeekBar? = null
+
+        private var saturation: Float = 1.0f
+        init {
+            this.saturation = saturation
+        }
+
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?,
         ): View? {
             val view: View = inflater.inflate(R.layout.filter_saturation, container, false)
-            val seekBar: CustomSeekBar = view.findViewById(R.id.seekBar)
-            seekBar.fromCenter = true
-            seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            this.seekBar = view.findViewById(R.id.seekBar)
+            this.seekBar?.fromCenter = true
+            this.seekBar?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
                 override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -73,8 +84,19 @@ class Saturation(name: String, saturation: Float = 1.0f) : Filter(name) {
                     }
                 }
             })
+            refresh(this.saturation)
             return view
         }
+
+        fun refresh(saturation: Float) {
+            this.saturation = saturation
+            if(saturation <= 1) {
+                this.seekBar?.progress = (saturation * 50.0f).toInt()
+            } else {
+                this.seekBar?.progress = ((saturation - 1.0f) / 3.0f * 50.0f + 50.0f).toInt()
+            }
+        }
+
     }
 
 }

@@ -70,5 +70,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 
+    // circle image view
+    implementation 'com.mikhaellopez:circularimageview:4.3.1'
 
 }

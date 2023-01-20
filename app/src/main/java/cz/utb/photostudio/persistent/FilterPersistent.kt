@@ -20,10 +20,10 @@ data class FilterPersistent(
 
     companion object {
 
-        val CONTRAST_TYPE: String = "CONTRAST"
-        val BRIGHTNESS_TYPE: String = "BRIGHTNESS"
-        val SATURATION_TYPE: String = "SATURATION"
-        val RGB_TYPE: String = "RGB"
+        const val CONTRAST_TYPE: String = "CONTRAST"
+        const val BRIGHTNESS_TYPE: String = "BRIGHTNESS"
+        const val SATURATION_TYPE: String = "SATURATION"
+        const val RGB_TYPE: String = "RGB"
 
         fun fromFilter(filter: Filter, image_uid: Int): FilterPersistent {
             val ret = FilterPersistent(0, image_uid, filter.filter_Name,"","","","","","")

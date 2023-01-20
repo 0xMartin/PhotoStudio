@@ -18,6 +18,7 @@ class Brightness(name: String, brightness: Float = 0.0f) : Filter(name) {
     init {
         this.brightness = brightness
         this.fragment = FilterFragment()
+        this.fragment?.refresh(this.brightness)
         this.fragment!!.brightnessChanged = { c ->
             this.brightness = c
             this.changed?.invoke()
@@ -38,6 +39,7 @@ class Brightness(name: String, brightness: Float = 0.0f) : Filter(name) {
 
     override fun reset() {
         this.brightness = 1.0f
+        this.fragment?.refresh(this.brightness)
     }
 
     private fun adjustBrightness(matrix: ColorMatrix, brightness: Float) {
@@ -54,16 +56,25 @@ class Brightness(name: String, brightness: Float = 0.0f) : Filter(name) {
     /**
      * Fragment pro ovladani filtru
      */
-    class FilterFragment : Fragment() {
+    class FilterFragment() : Fragment() {
+
         var brightnessChanged: ((c: Float)->Unit)? = null
+
+        private var seekBar: CustomSeekBar? = null
+
+        private var brightness: Float = 1.0f
+        init {
+            this.brightness = brightness
+        }
+
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?,
         ): View? {
             val view: View = inflater.inflate(R.layout.filter_brightness, container, false)
-            val seekBar: CustomSeekBar = view.findViewById(R.id.seekBar)
-            seekBar.fromCenter = true
-            seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            this.seekBar = view.findViewById(R.id.seekBar)
+            this.seekBar?.fromCenter = true
+            this.seekBar?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
                 override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -72,8 +83,15 @@ class Brightness(name: String, brightness: Float = 0.0f) : Filter(name) {
                     }
                 }
             })
+            refresh(this.brightness)
             return view
         }
+
+        fun refresh(brightness: Float) {
+            this.brightness = brightness
+            this.seekBar?.progress = ((brightness + 60.0f) / 120.0f * 100.0f).toInt()
+        }
+
     }
 
 }

@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.scale
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -58,6 +59,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
     // UID naposledy vyfoceneho obrazku (v dane session)
     var last_img_uid: Int? = null
+    var last_img_path: String? = null
 
 
     override fun onCreateView(
@@ -185,6 +187,13 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
             // pokud ne tak provede clear overlayer vrstvy s vysledakama detekce
             this.binding.overlay.clear()
         }
+
+        // obnoveni nahledu naposledy vyfoceneho obrazku
+        if(this.last_img_path != null) {
+            binding.imageviewLast.setImageBitmap(ImageIO.loadImage(requireContext(),
+                this.last_img_path!!)?.scale(128, 128))
+            binding.imageviewLast.invalidate()
+        }
     }
 
     override fun onPause() {
@@ -258,6 +267,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 // oprazek ulozi na uloziste zarizeni
                 val rotation: Int = this.activity?.windowManager?.defaultDisplay?.rotation ?: Surface.ROTATION_0
                 val path: String = ImageIO.saveImage(requireContext(), image, rotation)
+
                 // cas
                 val now = LocalDateTime.now()
                 var current = now.year.toString() + "-"
@@ -266,6 +276,14 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 current += "%02d".format(now.hour) + ":"
                 current += "%02d".format(now.minute) + ":"
                 current += "%02d".format(now.second)
+
+                // obnoveni nahledu naposledy vyfoceneho obrazku
+                this.last_img_path = path
+                Handler(Looper.getMainLooper()).post(java.lang.Runnable {
+                    binding.imageviewLast.setImageBitmap(ImageIO.loadImage(requireContext(), path)?.scale(128, 128))
+                    binding.imageviewLast.invalidate()
+                })
+
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                 last_img_uid = db.imageFileDao().getMaxUid() + 1
@@ -275,6 +293,7 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                     path
                 )
                 db.imageFileDao().insert(img)
+
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
                 Handler(Looper.getMainLooper()).post(java.lang.Runnable {

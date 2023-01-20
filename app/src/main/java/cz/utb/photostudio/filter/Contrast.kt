@@ -18,7 +18,8 @@ class Contrast(name: String, contrast: Float = 1.0f) : Filter(name) {
 
     init {
         this.contrast = contrast
-        this.fragment = FilterFragment()
+        this.fragment = FilterFragment(this.contrast)
+        this.fragment?.refresh(this.contrast)
         this.fragment!!.contrastChanged = { c ->
             this.contrast = c
             this.changed?.invoke()
@@ -39,6 +40,7 @@ class Contrast(name: String, contrast: Float = 1.0f) : Filter(name) {
 
     override fun reset() {
         this.contrast = 1.0f
+        this.fragment?.refresh(this.contrast)
     }
 
     private fun adjustContrast(matrix: ColorMatrix, contrast: Float) {
@@ -56,16 +58,25 @@ class Contrast(name: String, contrast: Float = 1.0f) : Filter(name) {
     /**
      * Fragment pro ovladani filtru
      */
-    class FilterFragment : Fragment() {
+    class FilterFragment(contrast: Float) : Fragment() {
+
         var contrastChanged: ((c: Float)->Unit)? = null
+
+        private var seekBar: CustomSeekBar? = null
+
+        private var contrast: Float = 1.0f
+        init {
+            this.contrast = contrast
+        }
+
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?,
         ): View? {
             val view: View = inflater.inflate(R.layout.filter_contrast, container, false)
-            val seekBar: CustomSeekBar = view.findViewById(R.id.seekBar)
-            seekBar.fromCenter = true
-            seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            this.seekBar = view.findViewById(R.id.seekBar)
+            this.seekBar?.fromCenter = true
+            this.seekBar?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
                 override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -74,8 +85,15 @@ class Contrast(name: String, contrast: Float = 1.0f) : Filter(name) {
                     }
                 }
             })
+            refresh(this.contrast)
             return view
         }
+
+        fun refresh(contrast: Float) {
+            this.contrast = contrast
+            this.seekBar?.progress = (contrast / 2.0f * 100.0f).toInt()
+        }
+
     }
 
 }

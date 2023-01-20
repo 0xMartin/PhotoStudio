@@ -1,8 +1,6 @@
 package cz.utb.photostudio.filter
 
-import android.graphics.Bitmap
 import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import androidx.fragment.app.Fragment
 
 abstract class Filter(name: String) {

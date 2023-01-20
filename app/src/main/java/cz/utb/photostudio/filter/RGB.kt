@@ -1,6 +1,5 @@
 package cz.utb.photostudio.filter
 
-import android.annotation.SuppressLint
 import android.graphics.*
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,7 +18,10 @@ class RGB(name: String, red: Float = 1.0f, green: Float = 1.0f, blue: Float = 1.
     private var fragment: FilterFragment? = null
 
     init {
-        this.fragment = FilterFragment()
+        this.red = red
+        this.green = green
+        this.blue = blue
+        this.fragment = FilterFragment(red, green, blue)
         this.fragment!!.redChanged = { c ->
             this.red = c
             this.changed?.invoke()
@@ -58,6 +60,7 @@ class RGB(name: String, red: Float = 1.0f, green: Float = 1.0f, blue: Float = 1.
         this.red = 1.0f
         this.green = 1.0f
         this.blue = 1.0f
+        this.fragment?.refresh(red, green, blue)
     }
 
     private fun adjustRGB(matrix: ColorMatrix, red: Float, green: Float, blue: Float) {
@@ -69,20 +72,34 @@ class RGB(name: String, red: Float = 1.0f, green: Float = 1.0f, blue: Float = 1.
     /**
      * Fragment pro ovladani filtru
      */
-    class FilterFragment : Fragment() {
+    class FilterFragment(red: Float, green: Float, blue: Float) : Fragment() {
+
         var redChanged: ((c: Float)->Unit)? = null
         var greenChanged: ((c: Float)->Unit)? = null
         var blueChanged: ((c: Float)->Unit)? = null
-        @SuppressLint("CutPasteId")
+
+        private var seekBarRed: CustomSeekBar? = null
+        private var seekBarGreen: CustomSeekBar? = null
+        private var seekBarBlue: CustomSeekBar? = null
+
+        private var red: Float = 1.0f
+        private var green: Float = 1.0f
+        private var blue: Float = 1.0f
+        init {
+            this.red = red
+            this.green = green
+            this.blue = blue
+        }
+
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?,
         ): View? {
             val view: View = inflater.inflate(R.layout.filter_rgb, container, false)
             // red
-            val seekBar: CustomSeekBar = view.findViewById(R.id.seekBarRed)
-            seekBar.fromCenter = true
-            seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            this.seekBarRed = view.findViewById(R.id.seekBarRed)
+            this.seekBarRed?.fromCenter = true
+            this.seekBarRed?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
                 override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -92,9 +109,9 @@ class RGB(name: String, red: Float = 1.0f, green: Float = 1.0f, blue: Float = 1.
                 }
             })
             // green
-            val seekBar2: CustomSeekBar = view.findViewById(R.id.seekBarGreen)
-            seekBar2.fromCenter = true
-            seekBar2.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            this.seekBarGreen = view.findViewById(R.id.seekBarGreen)
+            this.seekBarGreen?.fromCenter = true
+            this.seekBarGreen?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
                 override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -104,9 +121,9 @@ class RGB(name: String, red: Float = 1.0f, green: Float = 1.0f, blue: Float = 1.
                 }
             })
             // blue
-            val seekBar3: CustomSeekBar = view.findViewById(R.id.seekBarBlue)
-            seekBar3.fromCenter = true
-            seekBar3.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            this.seekBarBlue = view.findViewById(R.id.seekBarBlue)
+            this.seekBarBlue?.fromCenter = true
+            this.seekBarBlue?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
                 override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -115,8 +132,23 @@ class RGB(name: String, red: Float = 1.0f, green: Float = 1.0f, blue: Float = 1.
                     }
                 }
             })
+            this.refresh(red, green, blue)
             return view
         }
+
+        fun refresh(red: Float, green: Float, blue: Float) {
+            this.red = red
+            this.green = green
+            this.blue = blue
+
+            this.seekBarRed?.progress = (red / 2.0f * 100.0f).toInt()
+            this.seekBarGreen?.progress = (green / 2.0f * 100.0f).toInt()
+            this.seekBarBlue?.progress = (blue / 2.0f * 100.0f).toInt()
+            this.seekBarRed?.invalidate()
+            this.seekBarGreen?.invalidate()
+            this.seekBarBlue?.invalidate()
+        }
+
     }
 
 }

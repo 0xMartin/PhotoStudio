@@ -164,4 +164,19 @@
             android:src="@drawable/edit_icon" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/imageview_last"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="42dp"
+        android:src="@drawable/splash_image"
+        app:civ_border_color="@color/white"
+        app:civ_border_width="1dp"
+        app:civ_shadow="true"
+        app:civ_shadow_color="#444444"
+        app:civ_shadow_radius="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

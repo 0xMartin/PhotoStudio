@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black_transparent"
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:text="@string/rgb_filter"
+        android:textColor="@color/white"
+        tools:ignore="MissingConstraints" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:orientation="horizontal"
+        tools:ignore="MissingDefaultResource">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:text="@string/rgb_filter_red"
+            android:textColor="@color/white"
+            tools:ignore="MissingConstraints" />
+        <cz.utb.photostudio.util.CustomSeekBar
+            android:id="@+id/seekBarRed"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:max="100"
+            android:progress="50"
+            android:min="0"
+            android:progressDrawable="@android:color/transparent"
+            tools:ignore="MissingConstraints" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:orientation="horizontal"
+        tools:ignore="MissingDefaultResource">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:text="@string/rgb_filter_green"
+            android:textColor="@color/white"
+            tools:ignore="MissingConstraints" />
+        <cz.utb.photostudio.util.CustomSeekBar
+            android:id="@+id/seekBarGreen"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:max="100"
+            android:progress="50"
+            android:min="0"
+            android:progressDrawable="@android:color/transparent"
+            tools:ignore="MissingConstraints" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
+        tools:ignore="MissingDefaultResource">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:text="@string/rgb_filter_blue"
+            android:textColor="@color/white"
+            tools:ignore="MissingConstraints" />
+        <cz.utb.photostudio.util.CustomSeekBar
+            android:id="@+id/seekBarBlue"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:max="100"
+            android:progress="50"
+            android:min="0"
+            android:progressDrawable="@android:color/transparent"
+            tools:ignore="MissingConstraints" />
+    </LinearLayout>
+
+
+</LinearLayout>

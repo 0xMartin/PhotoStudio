@@ -26,12 +26,25 @@
             android:layout_weight="1" />
 
         <ImageButton
-            android:id="@+id/edit"
+            android:id="@+id/button_edit"
             android:layout_width="42dp"
             android:layout_height="match_parent"
             android:background="@null"
             android:src="@drawable/edit_icon"
             android:gravity="center"/>
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/button_export"
+            android:layout_width="42dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:gravity="center"
+            android:src="@drawable/export_icon" />
 
         <Space
             android:layout_width="wrap_content"

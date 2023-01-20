@@ -90,6 +90,7 @@ class CameraService {
     }
 
     fun requestNextImageOfPreview() {
+        this.copyBitmap?.recycle()
         this.copyBitmap = null
     }
 

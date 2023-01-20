@@ -5,10 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ImageFile::class, SettingsProperty::class], version = 5, exportSchema = true)
+@Database(entities = [ImageFile::class, SettingsProperty::class, FilterPersistent::class], version = 6, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun imageFileDao(): ImageFileDao
+
+    abstract fun filterPersistentDao(): FilterPersistentDao
 
     abstract fun settingsPropertyDao(): SettingsPropertyDao
 

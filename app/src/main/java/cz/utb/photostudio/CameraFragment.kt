@@ -5,14 +5,12 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.hardware.camera2.CaptureRequest
 import android.media.Image
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
@@ -20,6 +18,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
@@ -32,7 +31,6 @@ import cz.utb.photostudio.service.CameraService
 import cz.utb.photostudio.util.ImageIO
 import kotlinx.coroutines.*
 import org.tensorflow.lite.task.vision.detector.Detection
-import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.Executors
@@ -57,6 +55,9 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
     // animace barev tlacitka "take picture"
     var colorAnimation: ValueAnimator? = null
+
+    // UID naposledy vyfoceneho obrazku (v dane session)
+    var last_img_uid: Int? = null
 
 
     override fun onCreateView(
@@ -104,7 +105,13 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
 
         // tlacitko editoru
         this.binding.buttonEdit.setOnClickListener {
-            this.findNavController().navigate(R.id.action_CameraFragment_to_editorFragment)
+            if(this.last_img_uid == null) {
+                Toast.makeText(context,"First take picture", Toast.LENGTH_SHORT).show()
+            } else {
+                val bundle = bundleOf(EditorFragment.ARG_IMG_UID to this.last_img_uid)
+                this.findNavController()
+                    .navigate(R.id.action_CameraFragment_to_editorFragment, bundle)
+            }
         }
 
         // udela snimek
@@ -261,8 +268,9 @@ class CameraFragment : Fragment(), TensorFlowObjDetector.DetectorListener {
                 current += "%02d".format(now.second)
                 // ulozeni informaci do lokalni databaze
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
+                last_img_uid = db.imageFileDao().getMaxUid() + 1
                 val img = ImageFile(
-                    db.imageFileDao().getMaxUid() + 1,
+                    last_img_uid!!,
                     current,
                     path
                 )

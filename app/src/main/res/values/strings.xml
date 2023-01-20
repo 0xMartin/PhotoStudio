@@ -36,8 +36,14 @@
         <item>Month</item>
         <item>Day</item>
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="contrast_filter">Contrast Filter</string>
+    <string name="empty">Empty</string>
+    <string name="brightness_filter">Brightness Filter</string>
+    <string name="saturation_filter">Saturation Filter</string>
+    <string name="rgb_filter">RGB Filter</string>
+    <string name="rgb_filter_red"><![CDATA[Red    ]]></string>
+    <string name="rgb_filter_green">Green</string>
+    <string name="rgb_filter_blue"><![CDATA[Blue   ]]></string>
 
 </resources>

@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 data class SettingsProperty(
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "name")
-    val name: String,
+    var name: String,
 
     @ColumnInfo(name = "value")
-    val value: String
+    var value: String
 )

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- base colors -->
+    <color name="purple_100">#9944BB</color>
     <color name="purple_200">#661188</color>
     <color name="purple_500">#551177</color>
     <color name="purple_700">#441166</color>
@@ -8,9 +9,11 @@
     <color name="teal_700">#661144</color>
     <color name="black">#FF000000</color>
     <color name="black_1">#FF111111</color>
+    <color name="black_transparent">#99111111</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#FFAAAAAA</color>
     <color name="main_color">#FFFF00AA</color>
     <color name="main_color_transparent">#44FF00AA</color>
+    <color name="transparent">#00000000</color>
 
 </resources>

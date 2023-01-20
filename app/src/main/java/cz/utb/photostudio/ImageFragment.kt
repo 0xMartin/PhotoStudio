@@ -37,6 +37,7 @@ class ImageFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var img_uid: Int? = null
+    private var image: ImageFile? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,9 +60,14 @@ class ImageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // spusti editor pro tento obrazek
-        binding.edit.setOnClickListener {
+        binding.buttonEdit.setOnClickListener {
             val bundle = bundleOf(EditorFragment.ARG_IMG_UID to this.img_uid)
             findNavController().navigate(R.id.action_imageFragment_to_editorFragment, bundle)
+        }
+
+        // exportuje obrazek do galerie
+        binding.buttonExport.setOnClickListener {
+            this.image?.let { it1 -> ImageIO.exportImageToGallery(requireContext(), it1, false) }
         }
 
         // odstraneni tohoto obrazku
@@ -70,6 +76,7 @@ class ImageFragment : Fragment() {
                 try {
                     val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                     val image: ImageFile = img_uid?.let { db.imageFileDao().getById(it) } ?: return@execute
+                    db.filterPersistentDao().deleteAllWithImageUID(image.uid)
                     db.imageFileDao().delete(image)
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
                         findNavController().popBackStack()
@@ -87,12 +94,12 @@ class ImageFragment : Fragment() {
         Executors.newSingleThreadExecutor().execute {
             try {
                 val db: AppDatabase = AppDatabase.getDatabase(requireContext())
-                val image: ImageFile = img_uid?.let { db.imageFileDao().getById(it) } ?: return@execute
-                val bitmap: Bitmap? = ImageIO.loadImage(requireContext(), image.imagePath)
+                image = img_uid?.let { db.imageFileDao().getById(it) } ?: return@execute
+                val bitmap: Bitmap? = ImageIO.loadImage(requireContext(), image!!.imagePath)
                 bitmap?.let {
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {
                         try {
-                            val date: LocalDateTime = LocalDateTime.parse(image.date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                            val date: LocalDateTime = LocalDateTime.parse(image!!.date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                             binding.textView.text = "${date.dayOfMonth}. ${date.monthValue}. ${date.year} - " +
                                     "${"%02d".format(date.hour)}:${"%02d".format(date.minute)}:${"%02d".format(date.second)}"
                             binding.imageView.setImageBitmap(bitmap)

@@ -129,6 +129,6 @@ class TensorFlowObjDetector(
         const val DELEGATE_CPU = 0
         const val DELEGATE_GPU = 1
         const val DELEGATE_NNAPI = 2
-        const val MODEL_FILE = "model.tflite"
+        const val MODEL_FILE = "model2.tflite"
     }
 }

@@ -96,6 +96,7 @@ class GalleryFragment : Fragment() {
                 try {
                     val db: AppDatabase = AppDatabase.getDatabase(requireContext())
                     db.imageFileDao().deleteAll()
+                    db.filterPersistentDao().deleteAll()
                     reloadList(null)
                 } catch (e: java.lang.Exception) {
                     Handler(Looper.getMainLooper()).post(java.lang.Runnable {

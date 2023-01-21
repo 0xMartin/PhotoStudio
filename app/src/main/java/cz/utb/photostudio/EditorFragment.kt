@@ -99,7 +99,7 @@ class EditorFragment : Fragment() {
 
         // ulozi obrazek do galerie i s filtrama
         binding.buttonExport.setOnClickListener {
-            this.image?.let { it1 -> ImageIO.exportImageToGallery(requireContext(), it1, true) }
+            this.image?.let { it1 -> ImageIO.exportImageToGallery(requireContext(), it1, this.filterListAdapter?.getFilterList()) }
         }
 
         // ulozi filtry obrazku do databaze

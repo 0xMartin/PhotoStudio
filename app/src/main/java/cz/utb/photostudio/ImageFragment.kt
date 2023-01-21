@@ -67,7 +67,7 @@ class ImageFragment : Fragment() {
 
         // exportuje obrazek do galerie
         binding.buttonExport.setOnClickListener {
-            this.image?.let { it1 -> ImageIO.exportImageToGallery(requireContext(), it1, false) }
+            this.image?.let { it1 -> ImageIO.exportImageToGallery(requireContext(), it1, null) }
         }
 
         // odstraneni tohoto obrazku

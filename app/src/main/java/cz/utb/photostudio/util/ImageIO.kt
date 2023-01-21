@@ -78,21 +78,17 @@ class ImageIO {
             }
         }
 
-        fun exportImageToGallery(context: Context, image: ImageFile, applyFilters: Boolean) {
+        fun exportImageToGallery(context: Context, image: ImageFile, filters: List<Filter>?) {
             Executors.newSingleThreadExecutor().execute {
                 try {
                     // load img from local file system
                     val bitmap: Bitmap? = loadImage(context, image.imagePath)
 
                     // load filters from db and apply tham on img
-                    if(applyFilters) {
-                        val db: AppDatabase = AppDatabase.getDatabase(context)
-                        val filters: FilterPersistentDao = db.filterPersistentDao()
-
+                    if(filters != null) {
                         val matrix = ColorMatrix()
-                        for(fp in filters.getAllWithImageUID(image!!.uid)) {
-                            val f: Filter? = fp.createFilter()
-                            f?.applyFilter(matrix)
+                        for(f in filters) {
+                            f.applyFilter(matrix)
                         }
 
                         // apply color matrix
